@@ -1,0 +1,65 @@
+﻿@model IEnumerable<Tengella.Survey.Data.Models.SurveyObject>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index - Surveys</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.SurveyObjectId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SurveyTitle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SurveyDescription)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SurveyType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.User)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Questions)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SurveyObjectId)
+                </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SurveyTitle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SurveyDescription)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SurveyType)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.User.Email)
+            </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Questions)
+                </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.SurveyObjectId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.SurveyObjectId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.SurveyObjectId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
