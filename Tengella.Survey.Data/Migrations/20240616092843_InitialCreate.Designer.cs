@@ -12,7 +12,7 @@ using Tengella.Survey.Data;
 namespace Tengella.Survey.Data.Migrations
 {
     [DbContext(typeof(SurveyDbContext))]
-    [Migration("20240612125212_InitialCreate")]
+    [Migration("20240616092843_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,38 +33,48 @@ namespace Tengella.Survey.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AnswerId"));
 
-                    b.Property<string>("AnswerName")
+                    b.Property<string>("AnswerValue")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("QuestionId")
+                    b.Property<int?>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubmissionId")
                         .HasColumnType("int");
 
                     b.HasKey("AnswerId");
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Answers");
+                    b.HasIndex("SubmissionId");
 
-                    b.HasData(
-                        new
-                        {
-                            AnswerId = 1,
-                            AnswerName = "Bra",
-                            QuestionId = 1
-                        },
-                        new
-                        {
-                            AnswerId = 2,
-                            AnswerName = "Medel",
-                            QuestionId = 1
-                        },
-                        new
-                        {
-                            AnswerId = 3,
-                            AnswerName = "Dåligt",
-                            QuestionId = 1
-                        });
+                    b.ToTable("Answers");
+                });
+
+            modelBuilder.Entity("Tengella.Survey.Data.Models.Choice", b =>
+                {
+                    b.Property<int>("ChoiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChoiceId"));
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ChoiceId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("Choices");
                 });
 
             modelBuilder.Entity("Tengella.Survey.Data.Models.Question", b =>
@@ -79,6 +89,13 @@ namespace Tengella.Survey.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("QuestionPosition")
+                        .HasColumnType("int");
+
+                    b.Property<string>("QuestionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("SurveyObjectId")
                         .HasColumnType("int");
 
@@ -86,15 +103,28 @@ namespace Tengella.Survey.Data.Migrations
 
                     b.HasIndex("SurveyObjectId");
 
-                    b.ToTable("Question");
+                    b.ToTable("Questions");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            QuestionId = 1,
-                            QuestionName = "Hur mår du?",
-                            SurveyObjectId = 1
-                        });
+            modelBuilder.Entity("Tengella.Survey.Data.Models.Submission", b =>
+                {
+                    b.Property<int>("SubmissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubmissionId"));
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SurveyObjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("SubmissionId");
+
+                    b.HasIndex("SurveyObjectId");
+
+                    b.ToTable("Submissions");
                 });
 
             modelBuilder.Entity("Tengella.Survey.Data.Models.SurveyObject", b =>
@@ -125,16 +155,6 @@ namespace Tengella.Survey.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("SurveyObjects");
-
-                    b.HasData(
-                        new
-                        {
-                            SurveyObjectId = 1,
-                            SurveyDescription = "Enkät för att kolla av med anställda",
-                            SurveyTitle = "Enkät för anställda",
-                            SurveyType = "Feedback",
-                            UserId = 1
-                        });
                 });
 
             modelBuilder.Entity("Tengella.Survey.Data.Models.User", b =>
@@ -175,35 +195,49 @@ namespace Tengella.Survey.Data.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = 1,
-                            CreationDate = new DateTime(2024, 5, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "john.doe@example.com",
-                            FirstName = "John",
-                            LastName = "Doe",
-                            Password = "jattebra123",
-                            PhoneNumber = "1234567890"
-                        });
                 });
 
             modelBuilder.Entity("Tengella.Survey.Data.Models.Answer", b =>
                 {
                     b.HasOne("Tengella.Survey.Data.Models.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId");
+
+                    b.HasOne("Tengella.Survey.Data.Models.Submission", "Submission")
                         .WithMany("Answers")
-                        .HasForeignKey("QuestionId")
+                        .HasForeignKey("SubmissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Question");
+
+                    b.Navigation("Submission");
+                });
+
+            modelBuilder.Entity("Tengella.Survey.Data.Models.Choice", b =>
+                {
+                    b.HasOne("Tengella.Survey.Data.Models.Question", null)
+                        .WithMany("Choices")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Tengella.Survey.Data.Models.Question", b =>
                 {
                     b.HasOne("Tengella.Survey.Data.Models.SurveyObject", "SurveyObject")
                         .WithMany("Questions")
+                        .HasForeignKey("SurveyObjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SurveyObject");
+                });
+
+            modelBuilder.Entity("Tengella.Survey.Data.Models.Submission", b =>
+                {
+                    b.HasOne("Tengella.Survey.Data.Models.SurveyObject", "SurveyObject")
+                        .WithMany()
                         .HasForeignKey("SurveyObjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -223,6 +257,11 @@ namespace Tengella.Survey.Data.Migrations
                 });
 
             modelBuilder.Entity("Tengella.Survey.Data.Models.Question", b =>
+                {
+                    b.Navigation("Choices");
+                });
+
+            modelBuilder.Entity("Tengella.Survey.Data.Models.Submission", b =>
                 {
                     b.Navigation("Answers");
                 });

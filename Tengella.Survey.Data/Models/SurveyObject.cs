@@ -13,13 +13,14 @@ namespace Tengella.Survey.Data.Models
             Questions = new HashSet<Question>();
         }
         public int SurveyObjectId { get; set; }
-        public string SurveyTitle { get; set; }
-        public string SurveyDescription { get; set; }
-        public string SurveyType { get; set; }
-        public ICollection<Question> Questions { get; set; }
         //FK
         public int UserId { get; set; }
+        public string SurveyTitle { get; set; } = string.Empty;
+        public string SurveyDescription { get; set; } = string.Empty;
+        public string SurveyType { get; set; } = string.Empty;
+        //Navigation
         public User? User { get; set; }
+        public ICollection<Question> Questions { get; set; }
 
     }
 }

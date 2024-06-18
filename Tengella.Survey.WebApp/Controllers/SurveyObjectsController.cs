@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Tengella.Survey.Data;
 using Tengella.Survey.Data.Models;
 using Tengella.Survey.WebApp.Models;
+using Tengella.Survey.WebApp.ServiceInterface;
 
 
 namespace Tengella.Survey.WebApp.Controllers
@@ -11,19 +13,22 @@ namespace Tengella.Survey.WebApp.Controllers
     public class SurveyObjectsController : Controller
     {
         private readonly SurveyDbContext _context;
+        private readonly ISurveyService _surveyService;
+        private readonly ISubmissionService _submissionService;
+        private readonly IMapper _mapper;
 
-        public SurveyObjectsController(SurveyDbContext context)
+        public SurveyObjectsController(SurveyDbContext context, ISurveyService surveyService, ISubmissionService submissionService, IMapper mapper)
         {
             _context = context;
+            _surveyService = surveyService;
+            _submissionService = submissionService;
+            _mapper = mapper;
         }
 
         // GET: SurveyObjects
         public async Task<IActionResult> Index()
         {
-            var surveyDbContext = _context.SurveyObjects
-                .Include(s => s.User)
-                .Include(s => s.Questions);
-            return View(await surveyDbContext.ToListAsync());
+            return View(await _surveyService.GetAllSurveyAsync());
         }
 
         // GET: SurveyObjects/Details/5
@@ -33,11 +38,7 @@ namespace Tengella.Survey.WebApp.Controllers
             {
                 return NotFound();
             }
-
-            var surveyObject = await _context.SurveyObjects
-                .Include(s => s.User)
-                .Include(s => s.Questions).ThenInclude(s => s.Answers)
-                .FirstOrDefaultAsync(m => m.SurveyObjectId == id);
+            var surveyObject = await _surveyService.GetSurveyAsync(id);
             if (surveyObject == null)
             {
                 return NotFound();
@@ -52,14 +53,82 @@ namespace Tengella.Survey.WebApp.Controllers
                     QuestionId = q.QuestionId,
                     QuestionText = q.QuestionName,
                     QuestionPosition = q.QuestionPosition,
-                    QuestionAnswers = q.Answers.Select(a => new AnswerViewModel
+                    QuestionChoices = q.Choices.Select(a => new ChoiceViewModel
                     {
-                        AnswerId = a.AnswerId,
-                        AnswerName = a.AnswerName
+                        ChoiceId = a.ChoiceId,
+                        ChoicePosition = a.Position,
+                        ChoiceText = a.Text
+                    }).ToList()
+                }).ToList()
+            };
+            
+            return View(surveyViewModel);
+        }
+
+        // GET: SurveyObjects/DoSurvey/1
+        [HttpGet]
+        [Route("/{id:int}")]
+        public async Task<IActionResult> DoSurvey(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var surveyObject = await _surveyService.GetSurveyAsync(id);
+            
+            if (surveyObject == null)
+            {
+                return NotFound();
+            }
+            var surveyViewModel = new SurveyViewModel
+            {
+                SurveyId = surveyObject.SurveyObjectId,
+                SurveyTitle = surveyObject.SurveyTitle,
+                SurveyType = surveyObject.SurveyType,
+                SurveyDescription = surveyObject.SurveyDescription,
+                SurveyQuestions = surveyObject.Questions.Select(q => new QuestionViewModel
+                {
+                    QuestionId = q.QuestionId,
+                    QuestionText = q.QuestionName,
+                    QuestionPosition = q.QuestionPosition,
+                    QuestionChoices = q.Choices.Select(a => new ChoiceViewModel
+                    {
+                        ChoiceId = a.ChoiceId,
+                        ChoicePosition = a.Position,
+                        ChoiceText = a.Text
                     }).ToList()
                 }).ToList()
             };
             return View(surveyViewModel);
+        }
+        // GET: SurveyObjects/DoSurvey/1
+        [HttpPost]
+        [Route("/{id:int}")]
+        public async Task<IActionResult> DoSurvey(int? id, SurveyViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                var surveyObject = _surveyService.GetSurveyAsync(id);
+                viewModel = _mapper.Map<SurveyViewModel>(surveyObject);
+               
+                return View(viewModel);
+            }
+            var submission = new Submission
+            {
+                SurveyObjectId = viewModel.SurveyId,
+                Answers = viewModel.SurveyAnswers.Select(a => new Answer
+                {
+                    AnswerId = a.AnswerId,
+                    QuestionId = a.QuestionId,
+                    SubmissionId = a.SubmissionId,
+                    AnswerValue = a.AnswerValue
+                }).ToList(),
+                SubmissionDate = DateTime.Now
+            };
+            await _submissionService.SubmitSubmissionAsync(submission);
+            await _submissionService.SaveSubmissionAsync();
+            return View(viewModel);
         }
 
         // GET: SurveyObjects/Create

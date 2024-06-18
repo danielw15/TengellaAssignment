@@ -10,16 +10,17 @@ namespace Tengella.Survey.Data.Models
     {
         public Question() 
         {
-            Answers = new HashSet<Answer>();
+            Choices = new HashSet<Choice>();
         }
         public int QuestionId { get; set; }
-        public string QuestionName { get; set; }
-        public int QuestionPosition { get; set; } = 0;
-        public string QuestionType { get; set; }
-        public ICollection<Answer> Answers { get; set; }
         //FK
         public int SurveyObjectId { get; set; }
+        public string QuestionName { get; set; } = string.Empty;
+        public int QuestionPosition { get; set; } = 0;
+        public string QuestionType { get; set; } = string.Empty;
+        //Navigation
         public SurveyObject? SurveyObject { get; set; }
+        public ICollection<Choice> Choices { get; set; }
 
 
     }

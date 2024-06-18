@@ -14,7 +14,7 @@ namespace Tengella.Survey.Data
         public SurveyDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<SurveyDbContext>();
-            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=EcommerceDb;Trusted_Connection=True;MultipleActiveResultSets=true");
+            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=SurveyTengella;Trusted_Connection=True;MultipleActiveResultSets=true");
 
             return new SurveyDbContext(optionsBuilder.Options);
         }

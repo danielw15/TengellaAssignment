@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Tengella.Survey.Data;
+using Tengella.Survey.Data.Mapper;
+using Tengella.Survey.WebApp.Service;
+using Tengella.Survey.WebApp.ServiceInterface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,8 +10,11 @@ builder.Services.AddDbContext<SurveyDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
+builder.Services.AddAutoMapper(typeof(MapperConfig));
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddScoped<ISurveyService, SurveyService>();
+builder.Services.AddScoped<ISubmissionService, SubmissionService>();
+builder.Services.AddRazorPages();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

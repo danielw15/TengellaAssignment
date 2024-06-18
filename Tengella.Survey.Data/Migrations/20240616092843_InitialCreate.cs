@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace Tengella.Survey.Data.Migrations
 {
     /// <inheritdoc />
@@ -37,10 +35,10 @@ namespace Tengella.Survey.Data.Migrations
                 {
                     SurveyObjectId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
                     SurveyTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SurveyDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SurveyType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false)
+                    SurveyType = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,22 +52,65 @@ namespace Tengella.Survey.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Question",
+                name: "Questions",
                 columns: table => new
                 {
                     QuestionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    SurveyObjectId = table.Column<int>(type: "int", nullable: false),
                     QuestionName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SurveyObjectId = table.Column<int>(type: "int", nullable: false)
+                    QuestionPosition = table.Column<int>(type: "int", nullable: false),
+                    QuestionType = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Question", x => x.QuestionId);
+                    table.PrimaryKey("PK_Questions", x => x.QuestionId);
                     table.ForeignKey(
-                        name: "FK_Question_SurveyObjects_SurveyObjectId",
+                        name: "FK_Questions_SurveyObjects_SurveyObjectId",
                         column: x => x.SurveyObjectId,
                         principalTable: "SurveyObjects",
                         principalColumn: "SurveyObjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Submissions",
+                columns: table => new
+                {
+                    SubmissionId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SurveyObjectId = table.Column<int>(type: "int", nullable: false),
+                    SubmissionDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Submissions", x => x.SubmissionId);
+                    table.ForeignKey(
+                        name: "FK_Submissions_SurveyObjects_SurveyObjectId",
+                        column: x => x.SurveyObjectId,
+                        principalTable: "SurveyObjects",
+                        principalColumn: "SurveyObjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Choices",
+                columns: table => new
+                {
+                    ChoiceId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    QuestionId = table.Column<int>(type: "int", nullable: false),
+                    Position = table.Column<int>(type: "int", nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Choices", x => x.ChoiceId);
+                    table.ForeignKey(
+                        name: "FK_Choices_Questions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "Questions",
+                        principalColumn: "QuestionId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -79,43 +120,24 @@ namespace Tengella.Survey.Data.Migrations
                 {
                     AnswerId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AnswerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    QuestionId = table.Column<int>(type: "int", nullable: false)
+                    QuestionId = table.Column<int>(type: "int", nullable: true),
+                    SubmissionId = table.Column<int>(type: "int", nullable: false),
+                    AnswerValue = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Answers", x => x.AnswerId);
                     table.ForeignKey(
-                        name: "FK_Answers_Question_QuestionId",
+                        name: "FK_Answers_Questions_QuestionId",
                         column: x => x.QuestionId,
-                        principalTable: "Question",
-                        principalColumn: "QuestionId",
+                        principalTable: "Questions",
+                        principalColumn: "QuestionId");
+                    table.ForeignKey(
+                        name: "FK_Answers_Submissions_SubmissionId",
+                        column: x => x.SubmissionId,
+                        principalTable: "Submissions",
+                        principalColumn: "SubmissionId",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "UserId", "CreationDate", "Email", "FirstName", "LastName", "Password", "PhoneNumber" },
-                values: new object[] { 1, new DateTime(2024, 5, 11, 0, 0, 0, 0, DateTimeKind.Unspecified), "john.doe@example.com", "John", "Doe", "jattebra123", "1234567890" });
-
-            migrationBuilder.InsertData(
-                table: "SurveyObjects",
-                columns: new[] { "SurveyObjectId", "SurveyDescription", "SurveyTitle", "SurveyType", "UserId" },
-                values: new object[] { 1, "Enkät för att kolla av med anställda", "Enkät för anställda", "Feedback", 1 });
-
-            migrationBuilder.InsertData(
-                table: "Question",
-                columns: new[] { "QuestionId", "QuestionName", "SurveyObjectId" },
-                values: new object[] { 1, "Hur mår du?", 1 });
-
-            migrationBuilder.InsertData(
-                table: "Answers",
-                columns: new[] { "AnswerId", "AnswerName", "QuestionId" },
-                values: new object[,]
-                {
-                    { 1, "Bra", 1 },
-                    { 2, "Medel", 1 },
-                    { 3, "Dåligt", 1 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -124,8 +146,23 @@ namespace Tengella.Survey.Data.Migrations
                 column: "QuestionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Question_SurveyObjectId",
-                table: "Question",
+                name: "IX_Answers_SubmissionId",
+                table: "Answers",
+                column: "SubmissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Choices_QuestionId",
+                table: "Choices",
+                column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Questions_SurveyObjectId",
+                table: "Questions",
+                column: "SurveyObjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Submissions_SurveyObjectId",
+                table: "Submissions",
                 column: "SurveyObjectId");
 
             migrationBuilder.CreateIndex(
@@ -141,7 +178,13 @@ namespace Tengella.Survey.Data.Migrations
                 name: "Answers");
 
             migrationBuilder.DropTable(
-                name: "Question");
+                name: "Choices");
+
+            migrationBuilder.DropTable(
+                name: "Submissions");
+
+            migrationBuilder.DropTable(
+                name: "Questions");
 
             migrationBuilder.DropTable(
                 name: "SurveyObjects");

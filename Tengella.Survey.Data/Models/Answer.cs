@@ -9,8 +9,14 @@ namespace Tengella.Survey.Data.Models
     public class Answer
     {
         public int AnswerId { get; set; }
-        public string AnswerName { get; set; }
-        public int QuestionId { get; set; }
+        //FK
+        public int? QuestionId { get; set; }
+        //FK
+        public int SubmissionId { get; set; }
+        
+        public string AnswerValue { get; set; } = string.Empty;
+        //Navigation
         public Question? Question { get; set; }
+        public Submission? Submission { get; set; }
     }
 }
