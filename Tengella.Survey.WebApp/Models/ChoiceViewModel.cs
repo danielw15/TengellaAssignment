@@ -2,8 +2,8 @@
 {
     public class ChoiceViewModel
     {
-        public int ChoiceId { get; set; }
-        public int ChoicePosition { get; set;}
-        public string ChoiceText { get; set; } = string.Empty;
+        public int ChoiceId { get; set; } = 0;
+        public int? ChoicePosition { get; set;} = 0;
+        public string? ChoiceText { get; set; } = string.Empty;
     }
 }

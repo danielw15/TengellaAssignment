@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tengella.Survey.Data;
 
@@ -11,9 +12,11 @@ using Tengella.Survey.Data;
 namespace Tengella.Survey.Data.Migrations
 {
     [DbContext(typeof(SurveyDbContext))]
-    partial class SurveyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240620141220_UpdatedModelsAndFK")]
+    partial class UpdatedModelsAndFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,7 +92,7 @@ namespace Tengella.Survey.Data.Migrations
                     b.Property<string>("QuestionType")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SurveyObjectId")
+                    b.Property<int>("SurveyObjectId")
                         .HasColumnType("int");
 
                     b.HasKey("QuestionId");
@@ -217,7 +220,9 @@ namespace Tengella.Survey.Data.Migrations
                 {
                     b.HasOne("Tengella.Survey.Data.Models.SurveyObject", "SurveyObject")
                         .WithMany("Questions")
-                        .HasForeignKey("SurveyObjectId");
+                        .HasForeignKey("SurveyObjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("SurveyObject");
                 });

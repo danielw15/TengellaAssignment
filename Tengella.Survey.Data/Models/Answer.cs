@@ -14,7 +14,7 @@ namespace Tengella.Survey.Data.Models
         //FK
         public int SubmissionId { get; set; }
         
-        public string AnswerValue { get; set; } = string.Empty;
+        public string? AnswerValue { get; set; }
         //Navigation
         public Question? Question { get; set; }
         public Submission? Submission { get; set; }

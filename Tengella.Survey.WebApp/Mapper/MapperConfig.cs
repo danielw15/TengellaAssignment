@@ -16,6 +16,12 @@ namespace Tengella.Survey.Data.Mapper
         {
             CreateMap<SurveyViewModel, SurveyObject>();
             CreateMap<SurveyViewModel, SurveyObject>().ReverseMap();
+
+            CreateMap<QuestionViewModel, Question>();
+            CreateMap<QuestionViewModel, Question>().ReverseMap();
+
+            CreateMap<ChoiceViewModel, Choice>();
+            CreateMap<ChoiceViewModel, Choice>().ReverseMap();
         }
     }
 }

@@ -7,7 +7,7 @@
 <h1>Survey - in progress</h1>
 
 <form asp-action="DoSurvey" method="post">
-    <input hidden asp-for="SurveyId" />
+    <input hidden asp-for="SurveyObjectId" />
     <input hidden asp-for="SurveyTitle" />
     <input hidden asp-for="SurveyType" />
     <input hidden asp-for="SurveyDescription" />
@@ -37,7 +37,7 @@
     @foreach (var question in Model.SurveyQuestions!.OrderBy(s => s.QuestionPosition))
         {
             
-        <input hidden asp-for="SurveyAnswers![i].QuestionId" value="@question.QuestionId" />
+        <input hidden asp-for="@question.QuestionId" value="@question.QuestionId" />
             <input hidden asp-for="SurveyQuestions" value="@question" />
         <dt class="col-sm-2">
             @Html.DisplayFor(model => question.QuestionPosition)<text>. </text>@Html.DisplayFor(model => question.QuestionText)
@@ -45,11 +45,11 @@
         <dd class="col-sm-10">
 
         </dd>
-        @foreach (var choice in question.QuestionChoices.OrderBy(q => q.ChoicePosition))
+        @foreach (var choice in question.QuestionChoices!.OrderBy(q => q.ChoicePosition))
         {
                     <div class="form-check">
-                    <input type="hidden" asp-for="@Model.SurveyChoices" value="@question.QuestionChoices[i].ChoiceText" />
-                    <input type="hidden" asp-for="@Model.SurveyAnswers![i].AnswerValue" value="@question.QuestionChoices[i].ChoiceText"  />
+                    <input type="hidden" asp-for="@Model.SurveyChoices" value="@choice.ChoiceText" />
+                    <input type="hidden" asp-for="@Model.SurveyAnswers![i].AnswerValue" value="@choice.ChoiceText" />
                     <input class="form-check-input" id="@(question.QuestionId+choice.ChoiceText)" type="radio" name="@question.QuestionId"  />
                     <label for="@(question.QuestionId + choice.ChoiceText)" class="form-check-label">
                 @choice.ChoiceText
@@ -59,10 +59,10 @@
                     </div>
                 
                 j++;
-            }
+         }
 
             i++;
-        }
+     }
     
         
     <div class="form-group">

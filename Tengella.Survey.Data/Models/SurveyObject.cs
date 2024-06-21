@@ -15,12 +15,12 @@ namespace Tengella.Survey.Data.Models
         public int SurveyObjectId { get; set; }
         //FK
         public int UserId { get; set; }
-        public string SurveyTitle { get; set; } = string.Empty;
-        public string SurveyDescription { get; set; } = string.Empty;
-        public string SurveyType { get; set; } = string.Empty;
+        public string? SurveyTitle { get; set; }
+        public string? SurveyDescription { get; set; }
+        public string? SurveyType { get; set; }
         //Navigation
         public User? User { get; set; }
-        public ICollection<Question> Questions { get; set; }
+        public ICollection<Question>? Questions { get; set; }
 
     }
 }

@@ -1,0 +1,20 @@
+﻿@model Tengella.Survey.WebApp.Models.SurveyViewModel
+
+<tr>
+    
+    @for (var i = 0; i < Model.SurveyQuestions!.Count; i++)
+    {
+        @foreach (var choice in Model.SurveyChoices!.OrderBy(c => c.ChoicePosition))
+    {
+            <td><label type="number" name="@Model.SurveyQuestions[i].QuestionText+@choice.ChoiceId" value="@choice.ChoiceId" class="form-control" /></td>
+        <td>
+                <input type="text" name="@Model.SurveyQuestions[i].QuestionText+@choice.ChoiceText" value="@choice.ChoiceText" class="form-control" />
+        </td>
+        <td>
+                <input type="number" name="@Model.SurveyQuestions[i].QuestionText+@choice.ChoicePosition" value="@choice.ChoicePosition" class="form-control" />
+        </td>
+    }
+    }
+    
+    
+</tr>

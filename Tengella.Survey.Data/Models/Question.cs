@@ -14,13 +14,13 @@ namespace Tengella.Survey.Data.Models
         }
         public int QuestionId { get; set; }
         //FK
-        public int SurveyObjectId { get; set; }
-        public string QuestionName { get; set; } = string.Empty;
-        public int QuestionPosition { get; set; } = 0;
-        public string QuestionType { get; set; } = string.Empty;
+        public int? SurveyObjectId { get; set; }
+        public string? QuestionName { get; set; }
+        public int? QuestionPosition { get; set; }
+        public string? QuestionType { get; set; }
         //Navigation
         public SurveyObject? SurveyObject { get; set; }
-        public ICollection<Choice> Choices { get; set; }
+        public ICollection<Choice>? Choices { get; set; }
 
 
     }

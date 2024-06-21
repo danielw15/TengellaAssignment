@@ -11,7 +11,7 @@ namespace Tengella.Survey.Data.Models
         public int ChoiceId { get; set; }
         //FK
         public int QuestionId { get; set; }
-        public int Position { get; set; }
-        public string Text { get; set; } = string.Empty;
+        public int? Position { get; set; }
+        public string? Text { get; set; }
     }
 }

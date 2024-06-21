@@ -34,12 +34,12 @@ namespace Tengella.Survey.WebApp.Service
 
         public async Task SaveSurveyAsync()
         {
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
         public async Task SubmitSurveyAsync(SurveyObject survey)
         {
-            _context.Add(survey);
+            await _context.AddAsync(survey);
         }
 
         
