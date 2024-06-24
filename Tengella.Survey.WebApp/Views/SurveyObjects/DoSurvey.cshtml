@@ -40,7 +40,7 @@
         <input hidden asp-for="@question.QuestionId" value="@question.QuestionId" />
             <input hidden asp-for="SurveyQuestions" value="@question" />
         <dt class="col-sm-2">
-            @Html.DisplayFor(model => question.QuestionPosition)<text>. </text>@Html.DisplayFor(model => question.QuestionText)
+            @Html.DisplayFor(model => question.QuestionPosition)<text>. </text>@Html.DisplayFor(model => question.QuestionName)
         </dt>
         <dd class="col-sm-10">
 

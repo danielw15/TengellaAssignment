@@ -14,6 +14,7 @@ builder.Services.AddAutoMapper(typeof(MapperConfig));
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ISurveyService, SurveyService>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
+builder.Services.AddScoped<IQuestionService, QuestionService>();
 //builder.Services.AddRazorPages();
 
 

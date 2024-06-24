@@ -1,0 +1,39 @@
+﻿@model Tengella.Survey.WebApp.Models.QuestionViewModel
+
+<div class="row" id="questionDiv-@Model.QuestionPosition">
+    <h3>Fråga @Model.QuestionPosition</h3>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="col-md-10">
+        <div class="form-group">
+            <label asp-for="QuestionName" class="control-label"></label>
+            <input asp-for="QuestionName" class="form-control" />
+            <span asp-validation-for="QuestionName" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label asp-for="QuestionType" class="control-label"></label>
+            <input asp-for="QuestionType" class="form-control" />
+            <span asp-validation-for="QuestionType" class="text-danger"></span>
+        </div>
+        </div>
+        <div class="col-md-3">
+        <div class="form-group">
+            <label asp-for="QuestionPosition" class="control-label"></label>
+            <input asp-for="QuestionPosition" class="form-control" />
+            <span asp-validation-for="QuestionPosition" class="text-danger"></span>
+        </div>
+    </div>
+
+    <form id="form-@Model.QuestionPosition">
+        <div class="form-group" id="choicesContainer-@Model.QuestionPosition">
+            
+            @Html.EditorFor(model => model.QuestionChoices)
+        </div>
+        <button id="addChoiceBtn-@Model.QuestionPosition" data-question-position="@Model.QuestionPosition">Add Choice </button>
+    </form>
+</div>
+
+
+
+

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Tengella.Survey.Data;
 using Tengella.Survey.Data.Models;
 using Tengella.Survey.WebApp.Models;
+using Tengella.Survey.WebApp.Service;
 using Tengella.Survey.WebApp.ServiceInterface;
 
 
@@ -16,6 +17,7 @@ namespace Tengella.Survey.WebApp.Controllers
         private readonly SurveyDbContext _context;
         private readonly ISurveyService _surveyService;
         private readonly ISubmissionService _submissionService;
+        private readonly IQuestionService _questionService;
         private readonly IMapper _mapper;
 
         public SurveyObjectsController(SurveyDbContext context, ISurveyService surveyService, ISubmissionService submissionService, IMapper mapper)
@@ -52,7 +54,7 @@ namespace Tengella.Survey.WebApp.Controllers
                 SurveyQuestions = surveyObject.Questions.Select(q => new QuestionViewModel
                 {
                     QuestionId = q.QuestionId,
-                    QuestionText = q.QuestionName,
+                    QuestionName = q.QuestionName,
                     QuestionPosition = q.QuestionPosition,
                     QuestionChoices = q.Choices.Select(a => new ChoiceViewModel
                     {
@@ -91,7 +93,7 @@ namespace Tengella.Survey.WebApp.Controllers
                 SurveyQuestions = surveyObject.Questions.Select(q => new QuestionViewModel
                 {
                     QuestionId = q.QuestionId,
-                    QuestionText = q.QuestionName,
+                    QuestionName = q.QuestionName,
                     QuestionPosition = q.QuestionPosition,
                     QuestionChoices = q.Choices.Select(a => new ChoiceViewModel
                     {
@@ -147,12 +149,20 @@ namespace Tengella.Survey.WebApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(SurveyViewModel model)
+        public async Task<IActionResult> Create([Bind("SurveyObjectId, SurveyTitle, SurveyDescription, SurveyType, SurveyQuestions, QuestionChoices")] SurveyViewModel model)
         {
             var survey = _mapper.Map<SurveyObject>(model);
+            for(int i = 0; i < model.SurveyQuestions.Count; i++)
+            {
+                var question = _mapper.Map<Question>(model.SurveyQuestions[i]);
+                survey.Questions.Add(question);
+            }
+            
             survey.UserId = 1;
             await _surveyService.SubmitSurveyAsync(survey);
             await _surveyService.SaveSurveyAsync();
+
+            
             return RedirectToAction(nameof(Index));
         }
 
@@ -243,61 +253,76 @@ namespace Tengella.Survey.WebApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
-
-        //ADD QUESTION
-        // SurveyObjects/AddQuestion/8
-        [HttpPost]
-        public async Task<IActionResult> AddQuestion(SurveyViewModel model)
+        public async Task<ActionResult> AddQuestion([Bind("SurveyQuestions, QuestionChoices")] SurveyViewModel viewModel)
         {
-            if (model != null)
-            {
-                var question = new Question();
-                question.SurveyObjectId = model.SurveyObjectId;
-                if (model!.SurveyQuestions == null)
-                {
-                    model!.SurveyQuestions = new List<QuestionViewModel>();
-                }
-                var questionModel = new QuestionViewModel();
-                questionModel = _mapper.Map<QuestionViewModel>(question);
-                model.SurveyQuestions.Add(questionModel);
-                
-                
-                return PartialView("_QuestionRowPartial", questionModel);
-            }
-            else
-            {
-                model = new SurveyViewModel();
-                var question = new QuestionViewModel();
-                model!.SurveyQuestions!.Add(question);
-                return PartialView("_QuestionRowPartial", model);
-            }
-            
+            var question = new QuestionViewModel();
+            question.QuestionPosition = viewModel.SurveyQuestions.Count();
+            viewModel.SurveyQuestions.Add(question);
+            return PartialView("_QuestionRowPartial", viewModel);
         }
-        //ADD QUESTION
-        // SurveyObjects/AddChoice/8
-        [HttpPost]
-        public IActionResult AddChoice(int position, SurveyViewModel model)
+
+        public async Task<ActionResult> AddChoice([Bind("QuestionPosition,QuestionChoices")] QuestionViewModel viewModel)
         {
-            if (model.SurveyQuestions != null)
-            {
-                var choice = new ChoiceViewModel();
-                model!.SurveyQuestions[position]!.QuestionChoices!.Add(choice);
-                return PartialView("_ChoiceRowPartial", model);
-            }
-            else
-            {
-                var question = new QuestionViewModel();
-                var choice = new ChoiceViewModel();
-                question.QuestionChoices!.Add(choice);
-                model.SurveyQuestions!.Add(question);
-                return PartialView("_ChoiceRowPartial", model);
-            }
+            var choice = new ChoiceViewModel();
+            choice.ChoicePosition = viewModel.QuestionChoices.Count();
+            viewModel.QuestionChoices.Add(choice);
+            return PartialView("_ChoiceRowPartial", viewModel);
         }
 
         private bool SurveyObjectExists(int id)
         {
             return _context.SurveyObjects.Any(e => e.SurveyObjectId == id);
         }
+
+        //ADD QUESTION
+        // SurveyObjects/AddQuestion/8
+        //[HttpPost]
+        //public async Task<IActionResult> AddQuestion(SurveyViewModel viewModel)
+        //{
+        //    if (viewModel != null)
+        //    {
+        //        var question = new Question();
+        //        question.SurveyObjectId = viewModel.SurveyObjectId;
+        //        if (viewModel!.SurveyQuestions == null)
+        //        {
+        //            viewModel!.SurveyQuestions = new List<QuestionViewModel>();
+        //        }
+        //        var questionModel = new QuestionViewModel();
+        //        questionModel = _mapper.Map<QuestionViewModel>(question);
+        //        viewModel.SurveyQuestions.Add(questionModel);
+
+        //        return PartialView("_QuestionRowPartial", questionModel);
+        //    }
+        //    else
+        //    {
+        //        viewModel = new SurveyViewModel();
+        //        var question = new QuestionViewModel();
+        //        viewModel!.SurveyQuestions!.Add(question);
+        //        return PartialView("_QuestionRowPartial", viewModel);
+        //    }
+
+        //}
+        //ADD QUESTION
+        // SurveyObjects/AddChoice/8
+        //[HttpPost]
+        //public IActionResult AddChoice(int position, SurveyViewModel model)
+        //{
+        //    if (model.SurveyQuestions != null)
+        //    {
+        //        var choice = new ChoiceViewModel();
+        //        model!.SurveyQuestions[position]!.QuestionChoices!.Add(choice);
+        //        return PartialView("_ChoiceRowPartial", model);
+        //    }
+        //    else
+        //    {
+        //        var question = new QuestionViewModel();
+        //        var choice = new ChoiceViewModel();
+        //        question.QuestionChoices!.Add(choice);
+        //        model.SurveyQuestions!.Add(question);
+        //        return PartialView("_ChoiceRowPartial", model);
+        //    }
+        //}
+
+
     }
 }
