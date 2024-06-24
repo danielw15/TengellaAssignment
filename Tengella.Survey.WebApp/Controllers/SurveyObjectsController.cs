@@ -59,8 +59,8 @@ namespace Tengella.Survey.WebApp.Controllers
                     QuestionChoices = q.Choices.Select(a => new ChoiceViewModel
                     {
                         ChoiceId = a.ChoiceId,
-                        ChoicePosition = a.Position,
-                        ChoiceText = a.Text
+                        ChoicePosition = a.ChoicePosition,
+                        ChoiceText = a.ChoiceText
                     }).ToList()
                 }).ToList()
             };
@@ -98,8 +98,8 @@ namespace Tengella.Survey.WebApp.Controllers
                     QuestionChoices = q.Choices.Select(a => new ChoiceViewModel
                     {
                         ChoiceId = a.ChoiceId,
-                        ChoicePosition = a.Position,
-                        ChoiceText = a.Text
+                        ChoicePosition = a.ChoicePosition,
+                        ChoiceText = a.ChoiceText
                     }).ToList()
                 }).ToList()
             };
@@ -141,6 +141,8 @@ namespace Tengella.Survey.WebApp.Controllers
             survey.UserId = 1;
             SurveyViewModel viewModel = new SurveyViewModel();
             viewModel = _mapper.Map<SurveyViewModel>(survey);
+            var question = new QuestionViewModel();
+            
             return View(viewModel);
         }
 
@@ -155,8 +157,20 @@ namespace Tengella.Survey.WebApp.Controllers
             for(int i = 0; i < model.SurveyQuestions.Count; i++)
             {
                 var question = _mapper.Map<Question>(model.SurveyQuestions[i]);
+                for(int j = 0; j < model.SurveyQuestions[i].QuestionChoices.Count; i++)
+                {
+                    var choice = _mapper.Map<Choice>(model.SurveyQuestions[i].QuestionChoices[j]);
+                    survey.Questions.Select(q => new Choice
+                    {
+                        ChoiceId = choice.ChoiceId,
+                        QuestionId = question.QuestionId,
+                        ChoiceText = choice.ChoiceText,
+                        ChoicePosition = choice.ChoicePosition
+                    }).ToList();
+                }
                 survey.Questions.Add(question);
             }
+            
             
             survey.UserId = 1;
             await _surveyService.SubmitSurveyAsync(survey);
@@ -253,18 +267,19 @@ namespace Tengella.Survey.WebApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<ActionResult> AddQuestion([Bind("SurveyQuestions, QuestionChoices")] SurveyViewModel viewModel)
+        public async Task<ActionResult> AddQuestion([Bind("SurveyObjectId, SurveyTitle, SurveyDescription, SurveyType, SurveyQuestions, QuestionChoices")] SurveyViewModel viewModel)
         {
             var question = new QuestionViewModel();
-            question.QuestionPosition = viewModel.SurveyQuestions.Count();
+            question.QuestionPosition = viewModel.SurveyQuestions.Count() + 1;
             viewModel.SurveyQuestions.Add(question);
             return PartialView("_QuestionRowPartial", viewModel);
         }
 
+        
         public async Task<ActionResult> AddChoice([Bind("QuestionPosition,QuestionChoices")] QuestionViewModel viewModel)
         {
             var choice = new ChoiceViewModel();
-            choice.ChoicePosition = viewModel.QuestionChoices.Count();
+            choice.ChoicePosition = viewModel.QuestionChoices.Count() + 1;
             viewModel.QuestionChoices.Add(choice);
             return PartialView("_ChoiceRowPartial", viewModel);
         }

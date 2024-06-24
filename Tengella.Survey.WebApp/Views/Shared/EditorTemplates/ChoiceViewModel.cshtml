@@ -1,6 +1,6 @@
 ﻿@model Tengella.Survey.WebApp.Models.ChoiceViewModel
 
-<div class="row">
+<div class="row" id="choiceDiv-@Model.ChoicePosition">
     <h3>Svar: @Model.ChoicePosition</h3>
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="col-md-3">
@@ -17,5 +17,4 @@
             <span asp-validation-for="ChoiceText" class="text-danger"></span>
         </div>
         </div>
-
 </div>

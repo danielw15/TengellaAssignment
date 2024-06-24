@@ -24,16 +24,48 @@
             <span asp-validation-for="QuestionPosition" class="text-danger"></span>
         </div>
     </div>
-
     <form id="form-@Model.QuestionPosition">
         <div class="form-group" id="choicesContainer-@Model.QuestionPosition">
             
-            @Html.EditorFor(model => model.QuestionChoices)
+             @Html.EditorFor(model => model.QuestionChoices)
+        
         </div>
-        <button id="addChoiceBtn-@Model.QuestionPosition" data-question-position="@Model.QuestionPosition">Add Choice </button>
     </form>
+    <button id="addChoiceBtn-@Model.QuestionPosition" data-question-position="@Model.QuestionPosition">Add Choice </button>
+        
 </div>
 
 
 
 
+
+
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        // Use event delegation for dynamically added button
+        $(document).on('click', '[id^=addChoiceBtn-]', function (e) {
+            e.preventDefault(); // Prevent default button behavior
+
+            var questionPosition = $(this).data('question-position');
+            var formPosition = '#form-' + questionPosition;
+            var choicesContainerPosition = '#choicesContainer-' + questionPosition;
+            $.ajax({
+                url: '@Url.Action("AddChoice", "SurveyObjects")',
+                type: 'POST',
+                data: $(formPosition).serialize(),
+                success: function (result) {
+                    $(choicesContainerPosition).html(result);
+
+                },
+                error: function () {
+                    alert("Error adding choice");
+                }
+            });
+        });
+    });
+</script>
