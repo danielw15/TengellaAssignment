@@ -7,6 +7,7 @@ namespace Tengella.Survey.WebApp.ServiceInterface
         Task<Question> GetQuestionAsync(int? id);
         Task<List<Question>> GetAllQuestionAsync();
         Task SubmitQuestionAsync(Question question);
+        void UpdateQuestion(Question question);
         Task SaveQuestionAsync();
     }
 }

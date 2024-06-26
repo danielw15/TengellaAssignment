@@ -1,0 +1,76 @@
+﻿@* @model Tengella.Survey.WebApp.Models.SendSurveyViewModel
+
+@{
+    ViewData["Title"] = "Send Email";
+}
+
+<h1>Survey - Send Survey Email</h1>
+
+<form asp-controller="SurveyObjects" asp-action="SaveChoices" method="post">
+    <input type="hidden" name="SurveyObjectId" value="@Model.SurveyObjectId" />
+    <label name=""></label>
+    @for (int i = 0; i < Model.; i++)
+    {
+        <div>
+            
+            
+            
+                <div id="user-@i">
+                <button type="button" onclick="addEmailRecipient(@i)">Add Choice</button>
+                    
+
+                        
+                        
+
+
+                </div>
+            
+               
+                   
+
+
+
+                </div>
+            }
+        </div>
+    }
+    <button type="submit">Save Choices</button>
+</form>
+
+<script>
+    const userCounts = [];
+    const userIds = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+    @for (int i = 0; i < Model.Users.Count; i++)
+    {
+
+        <text>
+                userCounts[@i] = @Model.Users.Count();
+                userIds[@i] = @Model.Users[i].UserId;
+        </text>
+    }
+                    });
+
+    function addSingleChoice(userIndex) {
+        const userDiv = document.getElementById(`user-${userIndex}`);
+        const choiceIndex = userCounts[userIndex];
+
+        const newChoiceText = document.createElement('input');
+        newChoiceText.type = 'text';
+        newChoiceText.name = `Questions[${userIndex}].QuestionChoices[${choiceIndex}].ChoiceText`;
+
+        const newChoiceQuestionId = document.createElement('input');
+        newChoiceQuestionId.type = 'hidden';
+        newChoiceQuestionId.name = `Questions[${userIndex}].QuestionChoices[${choiceIndex}].QuestionId`;
+        newChoiceQuestionId.value = questionIds[userIndex];
+
+        const newChoicePosition = document.createElement('input');
+        newChoicePosition.type = 'hidden';
+        newChoicePosition.name = `Questions[${userIndex}].QuestionChoices[${choiceIndex}].ChoicePosition`;
+        newChoicePosition.value = choiceIndex;
+
+        userDiv.append(newChoiceText, newChoicePosition, newChoiceQuestionId);
+        choiceCounts[userIndex]++;
+    }
+</script> *@

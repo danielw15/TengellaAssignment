@@ -1,20 +1,23 @@
 ﻿@model Tengella.Survey.WebApp.Models.ChoiceViewModel
 
-<div class="row" id="choiceDiv-@Model.ChoicePosition">
+<div class="row">
     <h3>Svar: @Model.ChoicePosition</h3>
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input hidden asp-for="@Model.ChoiceId" />
+    <input hidden asp-for="@Model.QuestionId" />
+        <div asp-validation-summary="All" class="text-danger"></div>
     <div class="col-md-3">
         <div class="form-group">
-            <label asp-for="ChoicePosition" class="control-label"></label>
-            <input asp-for="ChoicePosition" class="form-control" />
-            <span asp-validation-for="ChoicePosition" class="text-danger"></span>
+            <label asp-for="@Model.ChoicePosition" class="control-label"></label>
+            <input asp-for="@Model.ChoicePosition" class="form-control" />
+            <span asp-validation-for="@Model.ChoicePosition" class="text-danger"></span>
         </div>
     </div>
     <div class="col-md-7">
         <div class="form-group">
-            <label asp-for="ChoiceText" class="control-label"></label>
-            <input asp-for="ChoiceText" class="form-control" />
-            <span asp-validation-for="ChoiceText" class="text-danger"></span>
+            <label asp-for="@Model.ChoiceText" class="control-label"></label>
+            <input asp-for="@Model.ChoiceText" class="form-control" />
+            <span asp-validation-for="@Model.ChoiceText" class="text-danger"></span>
         </div>
         </div>
+
 </div>

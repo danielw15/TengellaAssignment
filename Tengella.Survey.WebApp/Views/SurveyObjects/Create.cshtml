@@ -30,23 +30,19 @@
     
 
         <h4>Questions</h4>
-            
-                <div class="form-group" id="questionsContainer">
-                 @Html.EditorFor(model => model.SurveyQuestions)
-                 
-                </div>
-            <div class="form-group">
-                <button id="addQuestionBtn">Add Question </button>
-            </div>
-            
 
-    <div class="form-group">
-        <input type="submit" value="Create" class="btn btn-primary" />
-    </div>
+        <div class="form-group" id="questionsContainer">
+            @Html.EditorFor(model => model.SurveyQuestions)
+        </div>    
 </div>
 </form>
+<div class="form-group">
+                <button id="addQuestionBtn">Add Question </button>
+            </div>
 
-
+<div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
 
 <div>
     <a asp-action="Index">Back to List</a>
@@ -77,6 +73,52 @@
                 });
             });
         </script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                
+                // Use event delegation for dynamically added button
+                $(document).on('click', '#addChoiceBtn', function (e) {
+                    e.preventDefault(); // Prevent default button behavior
+                    $.ajax({
+                        url: '@Url.Action("AddChoice", "SurveyObjects")',
+                        type: 'POST',
+                        data: $('#formQuestion').serialize(),
+                        success: function (result) {
+                            $('#choicesContainer').html(result);
+                            
+                        },
+                        error: function () {
+                            alert("Error adding question");
+                        }
+                    });
+                });
+            });
+        </script>
+        // <script type="text/javascript">
+        //     $(document).ready(function () {
+
+        //         // Use event delegation for dynamically added button
+        //         $(document).on('click', '[id^=addChoiceBtn-]', function (e) {
+        //             e.preventDefault(); // Prevent default button behavior
+
+        //             var questionPosition = $(this).data('question-position');
+        //             var formPosition = '#form-' + questionPosition;
+        //             var choicesContainerPosition = '#choicesContainer-' + questionPosition;
+        //             $.ajax({
+        //                 url: '@Url.Action("AddChoice", "SurveyObjects")',
+        //                 type: 'POST',
+        //                 data: $(formPosition).serialize(),
+        //                 success: function (result) {
+        //                     $(choicesContainerPosition).html(result);
+
+        //                 },
+        //                 error: function () {
+        //                     alert("Error adding choice");
+        //                 }
+        //             });
+        //         });
+        //     });
+        // </script>
         
         
     }

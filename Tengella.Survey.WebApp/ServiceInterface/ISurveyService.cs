@@ -10,5 +10,7 @@ namespace Tengella.Survey.WebApp.ServiceInterface
         Task<List<SurveyObject>> GetAllSurveyAsync();
         Task SubmitSurveyAsync(SurveyObject survey);
         Task SaveSurveyAsync();
+        void UpdateSurvey(SurveyObject survey);
+        string GenerateSurveyUrl(int surveyId);
     }
 }

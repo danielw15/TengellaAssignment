@@ -38,6 +38,11 @@ namespace Tengella.Survey.WebApp.Service
             await _context.AddAsync(question);
         }
 
+        public void UpdateQuestion(Question question)
+        {
+            _context.Update(question);
+        }
+
 
     }
 }

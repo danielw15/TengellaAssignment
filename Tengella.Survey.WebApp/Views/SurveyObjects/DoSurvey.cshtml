@@ -1,15 +1,17 @@
-﻿@model Tengella.Survey.WebApp.Models.SurveyViewModel
-
+﻿@model Tengella.Survey.WebApp.Models.DoSurveyViewModel
+@using Tengella.Survey.Data.Enums;
 @{
     ViewData["Title"] = "Do Survey";
 }
 
 <h1>Survey - in progress</h1>
 
+
+
 <form asp-action="DoSurvey" method="post">
     <input hidden asp-for="SurveyObjectId" />
     <input hidden asp-for="SurveyTitle" />
-    <input hidden asp-for="SurveyType" />
+    
     <input hidden asp-for="SurveyDescription" />
     
 <div>
@@ -37,26 +39,56 @@
     @foreach (var question in Model.SurveyQuestions!.OrderBy(s => s.QuestionPosition))
         {
             
-        <input hidden asp-for="@question.QuestionId" value="@question.QuestionId" />
-            <input hidden asp-for="SurveyQuestions" value="@question" />
+        <input hidden name="SurveyQuestions[@i].QuestionId" value="@question.QuestionId" />
+           
         <dt class="col-sm-2">
-            @Html.DisplayFor(model => question.QuestionPosition)<text>. </text>@Html.DisplayFor(model => question.QuestionName)
+            <label>Fråga @question.QuestionPosition. @question.QuestionName</label>
         </dt>
         <dd class="col-sm-10">
 
         </dd>
+            <input type="hidden" name="SurveyAnswers[@i].AnswerId" value="@Model.SurveyAnswers[@i].AnswerId" />
+            <input type="hidden" name="SurveyAnswers[@i].QuestionId" value="@question.QuestionId" />
         @foreach (var choice in question.QuestionChoices!.OrderBy(q => q.ChoicePosition))
         {
+                @if(question.QuestionType == QuestionType.single_choice.ToString())
+                {
                     <div class="form-check">
-                    <input type="hidden" asp-for="@Model.SurveyChoices" value="@choice.ChoiceText" />
-                    <input type="hidden" asp-for="@Model.SurveyAnswers![i].AnswerValue" value="@choice.ChoiceText" />
-                    <input class="form-check-input" id="@(question.QuestionId+choice.ChoiceText)" type="radio" name="@question.QuestionId"  />
-                    <label for="@(question.QuestionId + choice.ChoiceText)" class="form-check-label">
-                @choice.ChoiceText
-            </label>
-                    <input type="hidden" asp-for="@Model.SurveyAnswers![i].QuestionId" value="@question.QuestionId" />
-                    
+                        @if (@Model.SurveyAnswers[i].AnswerValue.Equals(choice.ChoiceText) && @Model.SurveyAnswers[i].QuestionId == choice.QuestionId)
+                        {
+                            <input class="form-check-input" id="@(question.QuestionId+choice.ChoiceText)" type="radio" name="SurveyAnswers[@i].AnswerValue" value="@choice.ChoiceText" checked/>
+                            <label for="@(question.QuestionId+choice.ChoiceText)" class="form-check-label">
+                                @choice.ChoiceText
+                            </label>
+                        }else
+                        {
+                            <input class="form-check-input" id="@(question.QuestionId+choice.ChoiceText)" type="radio" name="SurveyAnswers[@i].AnswerValue" value="@choice.ChoiceText"/>
+                            <label for="@(question.QuestionId+choice.ChoiceText)" class="form-check-label">
+                                @choice.ChoiceText
+                            </label>
+                        }
+                        
+                        
+                        
+
                     </div>
+                }
+                @if (question.QuestionType == QuestionType.free_text_choice.ToString())
+                {
+                    
+                    <input type="hidden" name="SurveyAnswers[@i].QuestionId" value="@Model.SurveyAnswers[i].QuestionId" />
+                    <input type="hidden" name="SurveyAnswers[@i].SubmissionId" value="@Model.SurveyAnswers[i].SubmissionId" />
+                    if (Model.SurveyAnswers[i].AnswerId != 0)
+                    {
+                        <input type="hidden" name="SurveyAnswers[@i].AnswerId" value="@Model.SurveyAnswers[i].AnswerId" />
+                        <input type="text" name="SurveyAnswers[@i].AnswerValue" value="@Model.SurveyAnswers[i].AnswerValue" />
+                    }else
+                    {
+                        <input type="text" name="SurveyAnswers[@i].AnswerValue" value=""/>
+                    }
+                    
+                }
+
                 
                 j++;
          }

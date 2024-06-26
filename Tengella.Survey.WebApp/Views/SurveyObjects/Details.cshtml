@@ -41,7 +41,10 @@
     }
         </div>
 <div>
-    <a asp-action="DoSurvey" asp-route-id="@Model.SurveyObjectId">Take Survey</a>
+    
+    <a asp-action="MailSurvey" asp-route-id="@Model.SurveyObjectId">Email Survey</a>
+    <a asp-action="CreateSubmission" name="surveyId" value="@Model.SurveyObjectId" asp-route-id="@Model.SurveyObjectId">Take Survey</a>
+    <a asp-action="AddChoice" name="surveyId" value="@Model.SurveyObjectId" asp-route-id="@Model.SurveyObjectId">Add Choice</a>
     <a asp-action="Edit" asp-route-id="@Model.SurveyObjectId">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>

@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Options;
 using Tengella.Survey.Data;
 using Tengella.Survey.Data.Models;
 using Tengella.Survey.WebApp.Models;
 using Tengella.Survey.WebApp.Service;
 using Tengella.Survey.WebApp.ServiceInterface;
+using Tengella.Survey.WebApp.Settings;
 
 
 namespace Tengella.Survey.WebApp.Controllers
@@ -18,14 +20,22 @@ namespace Tengella.Survey.WebApp.Controllers
         private readonly ISurveyService _surveyService;
         private readonly ISubmissionService _submissionService;
         private readonly IQuestionService _questionService;
+        private readonly IMailSender _mailSender;
         private readonly IMapper _mapper;
 
-        public SurveyObjectsController(SurveyDbContext context, ISurveyService surveyService, ISubmissionService submissionService, IMapper mapper)
+        public SurveyObjectsController(SurveyDbContext context,
+            ISurveyService surveyService,
+            ISubmissionService submissionService,
+            IMapper mapper,
+            IMailSender mailSender,
+            IQuestionService questionService)
         {
             _context = context;
             _surveyService = surveyService;
             _submissionService = submissionService;
+            _questionService = questionService;
             _mapper = mapper;
+            _mailSender = mailSender;
         }
 
         // GET: SurveyObjects
@@ -68,70 +78,93 @@ namespace Tengella.Survey.WebApp.Controllers
             return View(surveyViewModel);
         }
 
-        // GET: SurveyObjects/DoSurvey/1
-        [HttpGet]
-        [Route("/{id:int}")]
-        public async Task<IActionResult> DoSurvey(int? id)
+        [HttpGet("/SurveyObjects/CreateSubmission/{surveyId}")]
+        public IActionResult CreateSubmission(int surveyId)
         {
-            if (id == null)
+            
+            
+                var uniqueToken = _submissionService.CreateSubmission(surveyId);
+
+                // Redirect to the survey page with surveyId and uniqueToken
+                return RedirectToAction("DoSurvey", "SurveyObjects", new { surveyId = surveyId, uniqueToken = uniqueToken });
+            
+            
+        }
+
+        // GET: SurveyObjects/DoSurvey/1
+        [HttpGet("/SurveyObjects/DoSurvey/{surveyId}/{uniqueToken}")]
+        public async Task<IActionResult> DoSurvey(int? surveyId, string uniqueToken)
+        {
+            if (surveyId == null)
+            {
+                return NotFound();
+            }
+            var submission = await _submissionService.GetSubmissionAsync(surveyId, uniqueToken);
+
+            if (submission == null)
             {
                 return NotFound();
             }
 
-            var surveyObject = await _surveyService.GetSurveyAsync(id);
+            var surveyObject = await _surveyService.GetSurveyAsync(surveyId);
             
             if (surveyObject == null)
             {
                 return NotFound();
             }
-            var surveyViewModel = new SurveyViewModel
+            var viewModel = new DoSurveyViewModel
             {
+                SubmissionId = submission.SubmissionId,
                 SurveyObjectId = surveyObject.SurveyObjectId,
+                UniqueToken = submission.UniqueToken,
                 SurveyTitle = surveyObject.SurveyTitle,
-                SurveyType = surveyObject.SurveyType,
                 SurveyDescription = surveyObject.SurveyDescription,
                 SurveyQuestions = surveyObject.Questions.Select(q => new QuestionViewModel
                 {
                     QuestionId = q.QuestionId,
                     QuestionName = q.QuestionName,
+                    QuestionType = q.QuestionType,
                     QuestionPosition = q.QuestionPosition,
-                    QuestionChoices = q.Choices.Select(a => new ChoiceViewModel
+                    SurveyObjectId = q.SurveyObjectId,
+                    QuestionChoices = q.Choices.Select(c => new ChoiceViewModel
                     {
-                        ChoiceId = a.ChoiceId,
-                        ChoicePosition = a.ChoicePosition,
-                        ChoiceText = a.ChoiceText
-                    }).ToList()
-                }).ToList()
+                        ChoiceId = c.ChoiceId,
+                        ChoicePosition = c.ChoicePosition,
+                        ChoiceText = c.ChoiceText,
+                        QuestionId = c.QuestionId,
+                    }).ToList(),
+                }).ToList(),
+                SurveyAnswers = _mapper.Map<List<AnswerViewModel>>(submission.Answers).ToList()
             };
-            return View(surveyViewModel);
+            if(viewModel.SurveyQuestions.Count > viewModel.SurveyAnswers.Count)
+            {
+                for (int i = viewModel.SurveyAnswers.Count; i < viewModel.SurveyQuestions.Count; i++)
+                {
+                    viewModel.SurveyAnswers.Add(new AnswerViewModel());
+                }
+            }
+            
+            return View(viewModel);
         }
-        // GET: SurveyObjects/DoSurvey/1
-        [HttpPost]
-        [Route("/{id:int}")]
-        public async Task<IActionResult> DoSurvey(int? id, SurveyViewModel viewModel)
+        
+        [HttpPost("/SurveyObjects/DoSurvey/{surveyId}/{uniqueToken}")]
+        public async Task<IActionResult> DoSurvey(int? surveyId, string uniqueToken, DoSurveyViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
-                var surveyObject = _surveyService.GetSurveyAsync(id);
-                viewModel = _mapper.Map<SurveyViewModel>(surveyObject);
+                var surveyObject = _surveyService.GetSurveyAsync(surveyId);
+                viewModel = _mapper.Map<DoSurveyViewModel>(surveyObject);
                
                 return View(viewModel);
             }
-            var submission = new Submission
-            {
-                SurveyObjectId = viewModel.SurveyObjectId,
-                Answers = viewModel.SurveyAnswers.Select(a => new Answer
-                {
-                    AnswerId = a.AnswerId,
-                    QuestionId = a.QuestionId,
-                    SubmissionId = a.SubmissionId,
-                    AnswerValue = a.AnswerValue
-                }).ToList(),
-                SubmissionDate = DateTime.Now
-            };
-            await _submissionService.SubmitSubmissionAsync(submission);
+            var submissionDb = await _submissionService.GetSubmissionAsync(surveyId, uniqueToken);
+            
+            submissionDb.Answers = _mapper.Map<List<Answer>>(viewModel.SurveyAnswers);
+            submissionDb.SubmissionDate = DateTime.Now;
+            
+            _submissionService.UpdateSubmission(submissionDb);
             await _submissionService.SaveSubmissionAsync();
-            return View(viewModel);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: SurveyObjects/Create
@@ -151,23 +184,13 @@ namespace Tengella.Survey.WebApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("SurveyObjectId, SurveyTitle, SurveyDescription, SurveyType, SurveyQuestions, QuestionChoices")] SurveyViewModel model)
+        public async Task<IActionResult> Create([Bind("SurveyObjectId, SurveyTitle, SurveyDescription, SurveyType, SurveyQuestions")] SurveyViewModel model)
         {
             var survey = _mapper.Map<SurveyObject>(model);
             for(int i = 0; i < model.SurveyQuestions.Count; i++)
             {
                 var question = _mapper.Map<Question>(model.SurveyQuestions[i]);
-                for(int j = 0; j < model.SurveyQuestions[i].QuestionChoices.Count; i++)
-                {
-                    var choice = _mapper.Map<Choice>(model.SurveyQuestions[i].QuestionChoices[j]);
-                    survey.Questions.Select(q => new Choice
-                    {
-                        ChoiceId = choice.ChoiceId,
-                        QuestionId = question.QuestionId,
-                        ChoiceText = choice.ChoiceText,
-                        ChoicePosition = choice.ChoicePosition
-                    }).ToList();
-                }
+                
                 survey.Questions.Add(question);
             }
             
@@ -179,6 +202,7 @@ namespace Tengella.Survey.WebApp.Controllers
             
             return RedirectToAction(nameof(Index));
         }
+
 
         // GET: SurveyObjects/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -267,6 +291,7 @@ namespace Tengella.Survey.WebApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
         public async Task<ActionResult> AddQuestion([Bind("SurveyObjectId, SurveyTitle, SurveyDescription, SurveyType, SurveyQuestions, QuestionChoices")] SurveyViewModel viewModel)
         {
             var question = new QuestionViewModel();
@@ -275,69 +300,86 @@ namespace Tengella.Survey.WebApp.Controllers
             return PartialView("_QuestionRowPartial", viewModel);
         }
 
-        
-        public async Task<ActionResult> AddChoice([Bind("QuestionPosition,QuestionChoices")] QuestionViewModel viewModel)
+        [HttpGet("/SurveyObjects/AddChoice/{surveyId}")]
+        public async Task<IActionResult> AddChoice(int surveyId)
         {
-            var choice = new ChoiceViewModel();
-            choice.ChoicePosition = viewModel.QuestionChoices.Count() + 1;
-            viewModel.QuestionChoices.Add(choice);
-            return PartialView("_ChoiceRowPartial", viewModel);
+            
+            var survey = await _surveyService.GetSurveyAsync(surveyId);
+            var questionList = _mapper.Map<List<QuestionViewModel>>(survey.Questions.ToList());
+            int i = 0;
+            foreach(var question in survey.Questions) 
+            {
+                questionList[i].QuestionChoices = _mapper.Map<List<ChoiceViewModel>>(question.Choices).ToList();
+                i++;
+            }
+
+            var viewModel = new AddChoiceViewModel
+            {
+                SurveyObjectId = surveyId,
+                Questions = questionList
+            };
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveChoices(AddChoiceViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var questionList = _mapper.Map<List<Question>>(model.Questions).ToList();
+                    for (int i = 0; i < questionList.Count; i++)
+                    {
+                        questionList[i].Choices = _mapper.Map<List<Choice>>(model.Questions[i].QuestionChoices).ToList();
+                        _questionService.UpdateQuestion(questionList[i]);
+                        await _questionService.SaveQuestionAsync();
+                    }
+                    
+                    
+
+                    // Redirect to a confirmation page or survey details page
+                    return RedirectToAction("Details", new { id = model.SurveyObjectId });
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions
+                    ViewBag.ErrorMessage = "Failed to save choices: " + ex.Message;
+                    return View("Error");
+                }
+            }
+
+            // If model state is invalid, return the same view with the current model to show validation errors
+            return View("AddChoices", model);
+        }
+
+
+
+        public async Task MailSurvey(int id, string email = "danielwallen1233@gmail.com", string subject = "Gör min enkät", string message = "https://localhost:7128/SurveyObjects/CreateSubmission/")
+        {
+            message += id;
+            var survey = await _surveyService.GetSurveyAsync(id);
+            
+            await _mailSender.SendEmailAsync(email, subject, message);
+        }
+
+        [HttpGet("/SurveyObjects/GenerateSurveyUrl/{surveyId}")]
+        public IActionResult GenerateSurveyUrl(int surveyId)
+        {
+            var surveyUrl = _submissionService.CreateSubmission(surveyId);
+
+            var viewModel = new SurveyViewModel
+            {
+                SurveyUrl = surveyUrl
+            };
+
+            return View("DoSurvey", viewModel);
         }
 
         private bool SurveyObjectExists(int id)
         {
             return _context.SurveyObjects.Any(e => e.SurveyObjectId == id);
         }
-
-        //ADD QUESTION
-        // SurveyObjects/AddQuestion/8
-        //[HttpPost]
-        //public async Task<IActionResult> AddQuestion(SurveyViewModel viewModel)
-        //{
-        //    if (viewModel != null)
-        //    {
-        //        var question = new Question();
-        //        question.SurveyObjectId = viewModel.SurveyObjectId;
-        //        if (viewModel!.SurveyQuestions == null)
-        //        {
-        //            viewModel!.SurveyQuestions = new List<QuestionViewModel>();
-        //        }
-        //        var questionModel = new QuestionViewModel();
-        //        questionModel = _mapper.Map<QuestionViewModel>(question);
-        //        viewModel.SurveyQuestions.Add(questionModel);
-
-        //        return PartialView("_QuestionRowPartial", questionModel);
-        //    }
-        //    else
-        //    {
-        //        viewModel = new SurveyViewModel();
-        //        var question = new QuestionViewModel();
-        //        viewModel!.SurveyQuestions!.Add(question);
-        //        return PartialView("_QuestionRowPartial", viewModel);
-        //    }
-
-        //}
-        //ADD QUESTION
-        // SurveyObjects/AddChoice/8
-        //[HttpPost]
-        //public IActionResult AddChoice(int position, SurveyViewModel model)
-        //{
-        //    if (model.SurveyQuestions != null)
-        //    {
-        //        var choice = new ChoiceViewModel();
-        //        model!.SurveyQuestions[position]!.QuestionChoices!.Add(choice);
-        //        return PartialView("_ChoiceRowPartial", model);
-        //    }
-        //    else
-        //    {
-        //        var question = new QuestionViewModel();
-        //        var choice = new ChoiceViewModel();
-        //        question.QuestionChoices!.Add(choice);
-        //        model.SurveyQuestions!.Add(question);
-        //        return PartialView("_ChoiceRowPartial", model);
-        //    }
-        //}
-
 
     }
 }

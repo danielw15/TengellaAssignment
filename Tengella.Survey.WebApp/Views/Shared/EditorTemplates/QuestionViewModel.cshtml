@@ -1,71 +1,36 @@
 ﻿@model Tengella.Survey.WebApp.Models.QuestionViewModel
 
-<div class="row" id="questionDiv-@Model.QuestionPosition">
-    <h3>Fråga @Model.QuestionPosition</h3>
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+<div class="row" id="questionDiv">
+
+    <h3>Fråga @Model.QuestionPosition vs ID: @Model.QuestionId</h3>
+    <input hidden asp-for="@Model.QuestionId" />
+    <input hidden asp-for="@Model.SurveyObjectId" />
+        <div asp-validation-summary="All" class="text-danger"></div>
     <div class="col-md-10">
         <div class="form-group">
-            <label asp-for="QuestionName" class="control-label"></label>
-            <input asp-for="QuestionName" class="form-control" />
-            <span asp-validation-for="QuestionName" class="text-danger"></span>
+            <label asp-for="@Model.QuestionName" class="control-label"></label>
+            <input asp-for="@Model.QuestionName" class="form-control" />
+            <span asp-validation-for="@Model.QuestionName" class="text-danger"></span>
         </div>
     </div>
     <div class="col-md-4">
         <div class="form-group">
-            <label asp-for="QuestionType" class="control-label"></label>
-            <input asp-for="QuestionType" class="form-control" />
-            <span asp-validation-for="QuestionType" class="text-danger"></span>
+            <label asp-for="@Model.QuestionType" class="control-label"></label>
+            <input asp-for="@Model.QuestionType" class="form-control" />
+            <span asp-validation-for="@Model.QuestionType" class="text-danger"></span>
         </div>
         </div>
         <div class="col-md-3">
         <div class="form-group">
-            <label asp-for="QuestionPosition" class="control-label"></label>
-            <input asp-for="QuestionPosition" class="form-control" />
-            <span asp-validation-for="QuestionPosition" class="text-danger"></span>
+            <label asp-for="@Model.QuestionPosition" class="control-label"></label>
+            <input asp-for="@Model.QuestionPosition" class="form-control" />
+            <span asp-validation-for="@Model.QuestionPosition" class="text-danger"></span>
         </div>
     </div>
-    <form id="form-@Model.QuestionPosition">
-        <div class="form-group" id="choicesContainer-@Model.QuestionPosition">
-            
-             @Html.EditorFor(model => model.QuestionChoices)
         
-        </div>
-    </form>
-    <button id="addChoiceBtn-@Model.QuestionPosition" data-question-position="@Model.QuestionPosition">Add Choice </button>
-        
+    
 </div>
 
 
-
-
-
-
-
-
-
-
-<script type="text/javascript">
-    $(document).ready(function () {
-
-        // Use event delegation for dynamically added button
-        $(document).on('click', '[id^=addChoiceBtn-]', function (e) {
-            e.preventDefault(); // Prevent default button behavior
-
-            var questionPosition = $(this).data('question-position');
-            var formPosition = '#form-' + questionPosition;
-            var choicesContainerPosition = '#choicesContainer-' + questionPosition;
-            $.ajax({
-                url: '@Url.Action("AddChoice", "SurveyObjects")',
-                type: 'POST',
-                data: $(formPosition).serialize(),
-                success: function (result) {
-                    $(choicesContainerPosition).html(result);
-
-                },
-                error: function () {
-                    alert("Error adding choice");
-                }
-            });
-        });
-    });
-</script>
