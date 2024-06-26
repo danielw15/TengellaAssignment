@@ -3,124 +3,127 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
-<h4>SurveyObject</h4>
-<form asp-action="Create" method="post" id="formSurvey">
-    <input hidden asp-for="SurveyObjectId" />
-<div class="row" id="SurveyContainer">
-    <div class="col-md-4">
-        
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div class="form-group">
-            <label asp-for="SurveyTitle" class="control-label"></label>
-            <input asp-for="SurveyTitle" class="form-control" />
-            <span asp-validation-for="SurveyTitle" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="SurveyDescription" class="control-label"></label>
-            <input asp-for="SurveyDescription" class="form-control" />
-            <span asp-validation-for="SurveyDescription" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="SurveyType" class="control-label"></label>
-            <input asp-for="SurveyType" class="form-control" />
-            <span asp-validation-for="SurveyType" class="text-danger"></span>
-        </div>
-        </div>
-    
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
 
-        <h4>Questions</h4>
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-        <div class="form-group" id="questionsContainer">
-            @Html.EditorFor(model => model.SurveyQuestions)
-        </div>    
-</div>
-</form>
-<div class="form-group">
-                <button id="addQuestionBtn">Add Question </button>
-            </div>
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+        }
 
-<div class="form-group">
-        <input type="submit" value="Create" class="btn btn-primary" />
+            .btn-custom:hover {
+                background-color: #0056b3;
+                color: white;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-5">
+        <div class="form-container">
+            <h1>Create Survey</h1>
+            <form asp-action="Create" method="post" id="formSurvey">
+                <input type="hidden" asp-for="SurveyObjectId" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <div class="form-group mb-3">
+                            <label asp-for="SurveyTitle" class="form-label"></label>
+                            <input asp-for="SurveyTitle" class="form-control" />
+                            <span asp-validation-for="SurveyTitle" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="SurveyDescription" class="form-label"></label>
+                            <input asp-for="SurveyDescription" class="form-control" />
+                            <span asp-validation-for="SurveyDescription" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="SurveyType" class="form-label"></label>
+                            <input asp-for="SurveyType" class="form-control" />
+                            <span asp-validation-for="SurveyType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>Questions</h4>
+                <div id="questions-container" class="mb-3"></div>
+
+                <div class="form-group mb-3">
+                    <button type="button" id="addQuestionBtn" class="btn btn-custom">Add Question</button>
+                </div>
+
+                <div class="form-group mb-3">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
     </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script type="text/javascript">
+        <script>
+            let questionIndex = 0;
+
             $(document).ready(function () {
-                
-                // Use event delegation for dynamically added button
-                $(document).on('click', '#addQuestionBtn', function (e) {
-                    e.preventDefault(); // Prevent default button behavior
-                    $.ajax({
-                        url: '@Url.Action("AddQuestion", "SurveyObjects")',
-                        type: 'POST',
-                        data: $('#formSurvey').serialize(),
-                        success: function (result) {
-                            $('#questionsContainer').html(result);
-                            
-                        },
-                        error: function () {
-                            alert("Error adding question");
-                        }
-                    });
+                $('#addQuestionBtn').click(function () {
+                    addQuestion();
                 });
             });
+
+            function addQuestion() {
+                const questionHtml = `
+                            <div class="form-group mb-3 border p-3" id="question-${questionIndex}">
+                                <h5>Question ${questionIndex + 1}</h5>
+                                <input type="hidden" name="SurveyQuestions[${questionIndex}].QuestionId" value="0" />
+                                <div class="mb-2">
+                                                <label for="SurveyQuestions_${questionIndex}__QuestionName" class="form-label">Question Name</label>
+                                                <input type="text" name="SurveyQuestions[${questionIndex}].QuestionName" class="form-control" />
+                                </div>
+                                <div class="mb-2">
+                                                <label for="SurveyQuestions_${questionIndex}__QuestionPosition" class="form-label">Question Position</label>
+                                                <input type="number" name="SurveyQuestions[${questionIndex}].QuestionPosition" class="form-control" />
+                                </div>
+                                <div class="mb-2">
+                                                <label for="SurveyQuestions_${questionIndex}__QuestionType" class="form-label">Question Type</label>
+                                                <select name="SurveyQuestions[${questionIndex}].QuestionType" class="form-select">
+                                        <option value="single_choice">Single Choice</option>
+                                        <option value="multiple_choice">Multiple Choice</option>
+                                        <option value="free_text">Free Text</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn btn-danger" onclick="removeQuestion(${questionIndex})">Remove Question</button>
+                            </div>
+                        `;
+                $('#questions-container').append(questionHtml);
+                questionIndex++;
+            }
+
+            function removeQuestion(index) {
+                $(`#question-${index}`).remove();
+                questionIndex--;
+            }
         </script>
-        <script type="text/javascript">
-            $(document).ready(function () {
-                
-                // Use event delegation for dynamically added button
-                $(document).on('click', '#addChoiceBtn', function (e) {
-                    e.preventDefault(); // Prevent default button behavior
-                    $.ajax({
-                        url: '@Url.Action("AddChoice", "SurveyObjects")',
-                        type: 'POST',
-                        data: $('#formQuestion').serialize(),
-                        success: function (result) {
-                            $('#choicesContainer').html(result);
-                            
-                        },
-                        error: function () {
-                            alert("Error adding question");
-                        }
-                    });
-                });
-            });
-        </script>
-        // <script type="text/javascript">
-        //     $(document).ready(function () {
-
-        //         // Use event delegation for dynamically added button
-        //         $(document).on('click', '[id^=addChoiceBtn-]', function (e) {
-        //             e.preventDefault(); // Prevent default button behavior
-
-        //             var questionPosition = $(this).data('question-position');
-        //             var formPosition = '#form-' + questionPosition;
-        //             var choicesContainerPosition = '#choicesContainer-' + questionPosition;
-        //             $.ajax({
-        //                 url: '@Url.Action("AddChoice", "SurveyObjects")',
-        //                 type: 'POST',
-        //                 data: $(formPosition).serialize(),
-        //                 success: function (result) {
-        //                     $(choicesContainerPosition).html(result);
-
-        //                 },
-        //                 error: function () {
-        //                     alert("Error adding choice");
-        //                 }
-        //             });
-        //         });
-        //     });
-        // </script>
-        
-        
     }
-}
-
+</body>
+</html>

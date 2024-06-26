@@ -7,6 +7,39 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebApp.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+        }
+
+            .btn-custom:hover {
+                background-color: #0056b3;
+                color: white;
+            }
+
+        .modal-content {
+            padding: 20px;
+        }
+
+        .modal-header, .modal-footer {
+            border: none;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -32,7 +65,7 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="SurveyObjects" asp-action="">Surveys</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Mail" asp-action="">Mail Invite</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="SurveyObjects" asp-action="StatisticsIndex">Statistics</a>
                         </li>
                     </ul>
                 </div>

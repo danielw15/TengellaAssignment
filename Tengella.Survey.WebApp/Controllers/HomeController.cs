@@ -1,38 +1,61 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Options;
 using Tengella.Survey.Data;
-using WebApp.Models;
+using Tengella.Survey.Data.Models;
+using Tengella.Survey.WebApp.Models;
+using Tengella.Survey.WebApp.Service;
+using Tengella.Survey.WebApp.ServiceInterface;
+using Tengella.Survey.WebApp.Settings;
 
 namespace WebApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly SurveyDbContext _surveyDbcontext;
+        private readonly SurveyDbContext _context;
+        private readonly ISurveyService _surveyService;
+        private readonly ISubmissionService _submissionService;
+        private readonly IQuestionService _questionService;
+        private readonly IMailSender _mailSender;
+        private readonly IMapper _mapper;
 
-        public HomeController(ILogger<HomeController> logger, SurveyDbContext surveyDbcontext)
+        public HomeController(SurveyDbContext context,
+            ISurveyService surveyService,
+            ISubmissionService submissionService,
+            IMapper mapper,
+            IMailSender mailSender,
+            IQuestionService questionService)
         {
-            _logger = logger;
-            _surveyDbcontext = surveyDbcontext;
+            _context = context;
+            _surveyService = surveyService;
+            _submissionService = submissionService;
+            _questionService = questionService;
+            _mapper = mapper;
+            _mailSender = mailSender;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            //Example of selecting the seed customer from database - that's it have fun
-            //var x = _surveyDbcontext.Customers.Where(c => c.CustomerId == 1).ToList();
+            var surveys = await _context.SurveyObjects
+                .Select(s => new SurveyViewModel
+                {
+                    SurveyObjectId = s.SurveyObjectId,
+                    SurveyTitle = s.SurveyTitle,
+                    SurveyDescription = s.SurveyDescription
+                })
+                .ToListAsync();
+            return View(surveys);
+        }
+            
 
+            public IActionResult Privacy()
+        {
             return View();
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        
     }
 }
