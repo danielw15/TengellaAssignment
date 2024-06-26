@@ -363,6 +363,47 @@ namespace Tengella.Survey.WebApp.Controllers
             await _mailSender.SendEmailAsync(email, subject, message);
         }
 
+        [HttpGet("/SurveyObjects/SendSurvey/{surveyId}")]
+        public async Task<IActionResult> SendSurvey(int surveyId)
+        {
+
+            var survey = await _surveyService.GetSurveyAsync(surveyId);
+            var questionList = _mapper.Map<List<QuestionViewModel>>(survey.Questions.ToList());
+            int i = 0;
+            foreach (var question in survey.Questions)
+            {
+                questionList[i].QuestionChoices = _mapper.Map<List<ChoiceViewModel>>(question.Choices).ToList();
+                i++;
+            }
+            var addChoiceiewModel = new AddChoiceViewModel
+            {
+                SurveyObjectId = surveyId,
+                Questions = questionList
+            };
+            var userList = new List<UserViewModel>();
+            userList.Add(new UserViewModel());
+            var viewModel = new SendSurveyViewModel
+            {
+                SurveyObjectId = surveyId,
+                SurveyTitle = survey.SurveyTitle,
+                SurveyDescription = survey.SurveyDescription,
+                AddChoice = addChoiceiewModel,
+                Subject = "",
+                Message = "",
+                Users = userList
+            };
+            
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MailSurveyToList(SendSurveyViewModel model)
+        {
+            
+            return RedirectToAction(nameof(Index));
+        }
+
+
         [HttpGet("/SurveyObjects/GenerateSurveyUrl/{surveyId}")]
         public IActionResult GenerateSurveyUrl(int surveyId)
         {

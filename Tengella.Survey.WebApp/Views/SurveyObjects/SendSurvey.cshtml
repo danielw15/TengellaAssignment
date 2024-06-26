@@ -1,4 +1,4 @@
-﻿@* @model Tengella.Survey.WebApp.Models.SendSurveyViewModel
+﻿@model Tengella.Survey.WebApp.Models.SendSurveyViewModel
 
 @{
     ViewData["Title"] = "Send Email";
@@ -6,71 +6,159 @@
 
 <h1>Survey - Send Survey Email</h1>
 
-<form asp-controller="SurveyObjects" asp-action="SaveChoices" method="post">
+<form asp-controller="SurveyObjects" asp-action="MailSurveyToList" method="post">
+    
     <input type="hidden" name="SurveyObjectId" value="@Model.SurveyObjectId" />
-    <label name=""></label>
-    @for (int i = 0; i < Model.; i++)
-    {
-        <div>
-            
-            
-            
-                <div id="user-@i">
-                <button type="button" onclick="addEmailRecipient(@i)">Add Choice</button>
-                    
-
-                        
-                        
-
-
-                </div>
-            
-               
-                   
+    <h4>Survey Title: @Model.SurveyTitle</h4>
+    <h4>Survey Description: @Model.SurveyDescription</h4>
+    <input type="hidden" name="SurveyTitle" value="@Model.SurveyTitle" />
+    <input type="hidden" name="SurveyDescription" value="@Model.SurveyDescription" />
+    <input type="text" name="Subject" placeholder="E-mail Subject" />
+    <input type="text" name="Message" placeholder="E-mail Message" />
+    <input type="text" name="SurveyLink" value="@Model.SurveyLink" />
 
 
 
-                </div>
-            }
+    <h2>Email List</h2>
+        
+
+        <div id="users-container">
+        
+        
+            @for (int j = 0; j < Model.Users.Count; j++)
+            {
+        <div id="user-@j">
+
+
+
+                <input type="text" name="Users[@j].FirstName" placeholder="First Name" />
+                <input type="text" name="Users[@j].LastName" placeholder="Last Name" />
+                <input type="text" name="Users[@j].Email" placeholder="Email" />
+                <input type="text" name="Users[@j].UserType" placeholder="User Type" />
+                <input type="text" name="Users[@j].OrgNumber" placeholder="Org Number" />
+                <input type="text" name="Users[@j].OrgName" placeholder="Org Name" />
+
         </div>
-    }
-    <button type="submit">Save Choices</button>
+            }
+    </div>
+
+
+    <button type="button" onclick="addUserRecipient()">Add User</button>
+    <button type="submit">Send to Users</button>
+    <button type="button" onclick="showSurveyPreview()">Preview Survey</button>
+
+    
 </form>
 
+
+<div id="previewModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Survey Preview</h2>
+        <div id="surveyPreviewContent">
+            
+        </div>
+    </div>
+</div>
+
 <script>
-    const userCounts = [];
-    const userIds = [];
+    var userIndex = @Model.Users.Count;
 
-    document.addEventListener("DOMContentLoaded", () => {
-    @for (int i = 0; i < Model.Users.Count; i++)
-    {
+    function addUserRecipient() {
+        const usersContainer = document.getElementById('users-container');
+        const userDiv = document.createElement('div');
+        userDiv.id = `user-${userIndex}`;
+        userDiv.classList.add('user-entry');
 
-        <text>
-                userCounts[@i] = @Model.Users.Count();
-                userIds[@i] = @Model.Users[i].UserId;
-        </text>
+        const newUserUserId = document.createElement('input');
+        newUserUserId.type = 'hidden';
+        newUserUserId.name = `Users[${userIndex}].UserId`;
+
+        const newUserFirstName = document.createElement('input');
+        newUserFirstName.type = 'text';
+        newUserFirstName.name = `Users[${userIndex}].FirstName`;
+        newUserFirstName.placeholder = 'First Name';
+
+        const newUserLastName = document.createElement('input');
+        newUserLastName.type = 'text';
+        newUserLastName.name = `Users[${userIndex}].LastName`;
+        newUserLastName.placeholder = 'Last Name';
+
+        const newUserEmail = document.createElement('input');
+        newUserEmail.type = 'text';
+        newUserEmail.name = `Users[${userIndex}].Email`;
+        newUserEmail.placeholder = 'Email';
+
+        const newUserUserType = document.createElement('input');
+        newUserUserType.type = 'text';
+        newUserUserType.name = `Users[${userIndex}].UserType`;
+        newUserUserType.placeholder = 'User Type';
+
+        const newUserOrgNumber = document.createElement('input');
+        newUserOrgNumber.type = 'text';
+        newUserOrgNumber.name = `Users[${userIndex}].OrgNumber`;
+        newUserOrgNumber.placeholder = 'Org Number';
+
+        const newUserOrgName = document.createElement('input');
+        newUserOrgName.type = 'text';
+        newUserOrgName.name = `Users[${userIndex}].OrgName`;
+        newUserOrgName.placeholder = 'Org Name';
+
+        userDiv.append(newUserUserId, newUserFirstName, newUserLastName, newUserEmail, newUserUserType, newUserOrgNumber, newUserOrgName);
+        usersContainer.appendChild(userDiv);
+        userIndex++;
     }
-                    });
+</script>
 
-    function addSingleChoice(userIndex) {
-        const userDiv = document.getElementById(`user-${userIndex}`);
-        const choiceIndex = userCounts[userIndex];
+<script>
+    function showSurveyPreview() {
+        const previewModal = document.getElementById('previewModal');
+        const previewContent = document.getElementById('surveyPreviewContent');
 
-        const newChoiceText = document.createElement('input');
-        newChoiceText.type = 'text';
-        newChoiceText.name = `Questions[${userIndex}].QuestionChoices[${choiceIndex}].ChoiceText`;
+        // Clear previous content
+        previewContent.innerHTML = '';
 
-        const newChoiceQuestionId = document.createElement('input');
-        newChoiceQuestionId.type = 'hidden';
-        newChoiceQuestionId.name = `Questions[${userIndex}].QuestionChoices[${choiceIndex}].QuestionId`;
-        newChoiceQuestionId.value = questionIds[userIndex];
+        // Fetch survey data from the form
+        const surveyTitle = document.querySelector('input[name="SurveyTitle"]').value;
+        const surveyMessage = document.querySelector('input[name="SurveyDescription"]').value;
 
-        const newChoicePosition = document.createElement('input');
-        newChoicePosition.type = 'hidden';
-        newChoicePosition.name = `Questions[${userIndex}].QuestionChoices[${choiceIndex}].ChoicePosition`;
-        newChoicePosition.value = choiceIndex;
+        // Fetch questions from the model
+        const questions = @Html.Raw(Json.Serialize(Model.AddChoice.Questions));
 
-        userDiv.append(newChoiceText, newChoicePosition, newChoiceQuestionId);
-        choiceCounts[userIndex]++;
+        // Populate the preview content
+        previewContent.innerHTML += `<h3>${surveyTitle}</h3>`;
+        previewContent.innerHTML += `<p>${surveyMessage}</p>`;
+
+        previewContent.innerHTML += `<h4>Questions</h4>`;
+        questions.forEach((question, qIndex) => {
+            previewContent.innerHTML += `<div><strong>Q${qIndex + 1}: ${question.questionName}</strong></div>`;
+
+            if (!question.questionChoices || question.questionChoices.length === 0) {
+                console.error(`QuestionChoices is undefined for question: ${JSON.stringify(question)}`);
+                previewContent.innerHTML += `<div style="color: red;">Error: No choices available for this question</div>`;
+                return;
+            }
+
+            question.questionChoices.forEach((choice, cIndex) => {
+                previewContent.innerHTML += `<div>&nbsp;&nbsp;${String.fromCharCode(65 + cIndex)}. ${choice.choiceText}</div>`;
+            });
+            previewContent.innerHTML += '<hr>';
+        });
+
+        // Show the modal
+        previewModal.style.display = 'block';
     }
-</script> *@
+
+    function closeModal() {
+        const previewModal = document.getElementById('previewModal');
+        previewModal.style.display = 'none';
+    }
+
+    // Close the modal when the user clicks outside of it
+    window.onclick = function (event) {
+        const previewModal = document.getElementById('previewModal');
+        if (event.target == previewModal) {
+            previewModal.style.display = 'none';
+        }
+    }
+</script>

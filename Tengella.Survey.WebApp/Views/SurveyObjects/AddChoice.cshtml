@@ -28,6 +28,7 @@
 
                         <input type="hidden" name="Questions[@i].QuestionChoices[@j].QuestionId" value="@Model.Questions[i].QuestionId" />
                         <input type="hidden" name="Questions[@i].QuestionChoices[@j].ChoicePosition" value="@Model.Questions[i].QuestionChoices[@j].ChoicePosition" />
+                        @* Kollar om det finns Choices sen tidigiare, om det finns så inkluderas ChoiceId då det endast ska uppdateras i DB *@
                         if (Model.Questions[i].QuestionChoices.Count >= j)
                         {
                             <input type="hidden" name="Questions[@i].QuestionChoices[@j].ChoiceId" value="@Model.Questions[i].QuestionChoices[j].ChoiceId" />
