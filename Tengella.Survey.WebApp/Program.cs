@@ -36,10 +36,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-using (var context = new SurveyDbContext())
-{
-    context.Database.EnsureCreated();
-}
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
