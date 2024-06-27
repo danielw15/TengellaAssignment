@@ -150,6 +150,202 @@ namespace Tengella.Survey.Data.Migrations
                     b.ToTable("SurveyObjects");
                 });
 
+            modelBuilder.Entity("Tengella.Survey.Data.Models.SurveyTemplate", b =>
+                {
+                    b.Property<int>("SurveyTemplateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SurveyTemplateId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TemplateName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SurveyTemplateId");
+
+                    b.ToTable("SurveyTemplates");
+
+                    b.HasData(
+                        new
+                        {
+                            SurveyTemplateId = 1,
+                            Description = "Gauge customer satisfaction with our cleaning services.",
+                            TemplateName = "Customer Satisfaction Survey"
+                        },
+                        new
+                        {
+                            SurveyTemplateId = 2,
+                            Description = "Gather feedback from employees on the cleanliness of the workplace.",
+                            TemplateName = "Employee Feedback Survey"
+                        },
+                        new
+                        {
+                            SurveyTemplateId = 3,
+                            Description = "Understand market needs and preferences for cleaning services.",
+                            TemplateName = "Market Research Survey"
+                        });
+                });
+
+            modelBuilder.Entity("Tengella.Survey.Data.Models.TemplateChoice", b =>
+                {
+                    b.Property<int>("TemplateChoiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TemplateChoiceId"));
+
+                    b.Property<int?>("ChoicePosition")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ChoiceText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TemplateQuestionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TemplateChoiceId");
+
+                    b.HasIndex("TemplateQuestionId");
+
+                    b.ToTable("TemplateChoices");
+
+                    b.HasData(
+                        new
+                        {
+                            TemplateChoiceId = 1,
+                            ChoiceText = "Very Satisfied",
+                            TemplateQuestionId = 1
+                        },
+                        new
+                        {
+                            TemplateChoiceId = 2,
+                            ChoiceText = "Satisfied",
+                            TemplateQuestionId = 1
+                        },
+                        new
+                        {
+                            TemplateChoiceId = 3,
+                            ChoiceText = "Neutral",
+                            TemplateQuestionId = 1
+                        },
+                        new
+                        {
+                            TemplateChoiceId = 4,
+                            ChoiceText = "Dissatisfied",
+                            TemplateQuestionId = 1
+                        },
+                        new
+                        {
+                            TemplateChoiceId = 5,
+                            ChoiceText = "Very Dissatisfied",
+                            TemplateQuestionId = 1
+                        },
+                        new
+                        {
+                            TemplateChoiceId = 6,
+                            ChoiceText = "Very Likely",
+                            TemplateQuestionId = 2
+                        },
+                        new
+                        {
+                            TemplateChoiceId = 7,
+                            ChoiceText = "Likely",
+                            TemplateQuestionId = 2
+                        },
+                        new
+                        {
+                            TemplateChoiceId = 8,
+                            ChoiceText = "Neutral",
+                            TemplateQuestionId = 2
+                        },
+                        new
+                        {
+                            TemplateChoiceId = 9,
+                            ChoiceText = "Unlikely",
+                            TemplateQuestionId = 2
+                        },
+                        new
+                        {
+                            TemplateChoiceId = 10,
+                            ChoiceText = "Very Unlikely",
+                            TemplateQuestionId = 2
+                        });
+                });
+
+            modelBuilder.Entity("Tengella.Survey.Data.Models.TemplateQuestion", b =>
+                {
+                    b.Property<int>("TemplateQuestionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TemplateQuestionId"));
+
+                    b.Property<int?>("QuestionPosition")
+                        .HasColumnType("int");
+
+                    b.Property<string>("QuestionText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("QuestionType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SurveyTemplateId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TemplateQuestionId");
+
+                    b.HasIndex("SurveyTemplateId");
+
+                    b.ToTable("TemplateQuestions");
+
+                    b.HasData(
+                        new
+                        {
+                            TemplateQuestionId = 1,
+                            QuestionText = "How satisfied are you with our cleaning services?",
+                            QuestionType = "single_choice",
+                            SurveyTemplateId = 1
+                        },
+                        new
+                        {
+                            TemplateQuestionId = 2,
+                            QuestionText = "How likely are you to recommend our services to others?",
+                            QuestionType = "single_choice",
+                            SurveyTemplateId = 1
+                        },
+                        new
+                        {
+                            TemplateQuestionId = 3,
+                            QuestionText = "How would you rate the cleanliness of your workspace?",
+                            QuestionType = "single_choice",
+                            SurveyTemplateId = 2
+                        },
+                        new
+                        {
+                            TemplateQuestionId = 4,
+                            QuestionText = "Do you have any suggestions for improving our cleaning services?",
+                            QuestionType = "free_text",
+                            SurveyTemplateId = 2
+                        },
+                        new
+                        {
+                            TemplateQuestionId = 5,
+                            QuestionText = "How often do you use professional cleaning services?",
+                            QuestionType = "single_choice",
+                            SurveyTemplateId = 3
+                        },
+                        new
+                        {
+                            TemplateQuestionId = 6,
+                            QuestionText = "What factors influence your decision to hire a cleaning service?",
+                            QuestionType = "multiple_choice",
+                            SurveyTemplateId = 3
+                        });
+                });
+
             modelBuilder.Entity("Tengella.Survey.Data.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -183,7 +379,6 @@ namespace Tengella.Survey.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
@@ -248,6 +443,22 @@ namespace Tengella.Survey.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Tengella.Survey.Data.Models.TemplateChoice", b =>
+                {
+                    b.HasOne("Tengella.Survey.Data.Models.TemplateQuestion", "TemplateQuestion")
+                        .WithMany("Choices")
+                        .HasForeignKey("TemplateQuestionId");
+
+                    b.Navigation("TemplateQuestion");
+                });
+
+            modelBuilder.Entity("Tengella.Survey.Data.Models.TemplateQuestion", b =>
+                {
+                    b.HasOne("Tengella.Survey.Data.Models.SurveyTemplate", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("SurveyTemplateId");
+                });
+
             modelBuilder.Entity("Tengella.Survey.Data.Models.Question", b =>
                 {
                     b.Navigation("Choices");
@@ -261,6 +472,16 @@ namespace Tengella.Survey.Data.Migrations
             modelBuilder.Entity("Tengella.Survey.Data.Models.SurveyObject", b =>
                 {
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("Tengella.Survey.Data.Models.SurveyTemplate", b =>
+                {
+                    b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("Tengella.Survey.Data.Models.TemplateQuestion", b =>
+                {
+                    b.Navigation("Choices");
                 });
 #pragma warning restore 612, 618
         }

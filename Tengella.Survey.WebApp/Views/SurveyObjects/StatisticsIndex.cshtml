@@ -4,56 +4,23 @@
     ViewData["Title"] = "Survey Statistics";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-
-        .container {
-            margin-top: 50px;
-        }
-
-        .summary-card {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <div class="text-center mb-4">
-            <h1 class="display-4">@ViewData["Title"]</h1>
-        </div>
-
-        <div class="row">
-            @foreach (var survey in Model)
-            {
-                <div class="col-md-4">
-                    <div class="summary-card">
-                        <h4>@survey.SurveyTitle</h4>
-                        <p>@survey.SurveyDescription</p>
-                        <p><strong>Total Submissions:</strong> @survey.TotalSubmissions</p>
-                        <p><strong>Average Answers per Submission:</strong> @survey.AverageAnswersPerSubmission.ToString("F2")</p>
-                        <a href="@Url.Action("Statistics", new { id = survey.SurveyObjectId })" class="btn btn-primary">View Details</a>
-                    </div>
-                </div>
-            }
-        </div>
+<div class="container">
+    <div class="text-center mb-4">
+        <h1 class="display-4">@ViewData["Title"]</h1>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-</html>
+    <div class="row">
+        @foreach (var survey in Model)
+        {
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <h4>@survey.SurveyTitle</h4>
+                    <p>@survey.SurveyDescription</p>
+                    <p><strong>Total Submissions:</strong> @survey.TotalSubmissions</p>
+                    <p><strong>Average Answers per Submission:</strong> @survey.AverageAnswersPerSubmission.ToString("F2")</p>
+                    <a href="@Url.Action("Statistics", new { id = survey.SurveyObjectId })" class="btn btn-primary">View Details</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

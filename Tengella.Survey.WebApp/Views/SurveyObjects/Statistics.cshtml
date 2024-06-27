@@ -20,165 +20,144 @@
     var totalAnswers = Model.Submissions.SelectMany(s => s.Answers).Where(a => a.AnswerValue != "").Count();
     var avgAnswersPerSubmission = totalAnswers / (double)totalSubmissions;
     var avgAnswersPerQuestion = totalAnswers / (double)Model.Questions.Count;
-    
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h1 class="display-4 text-primary">@Model.SurveyTitle</h1>
+        <p class="lead">@Model.SurveyDescription</p>
+    </div>
 
-        .chart-container {
-            margin-top: 20px;
-        }
-
-        .chart-wrapper {
-            width: 300px;
-            height: 300px;
-            margin: auto;
-        }
-
-        .chart-buttons {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container mt-5">
-        <div class="text-center mb-4">
-            <h1 class="display-4">@Model.SurveyTitle</h1>
-            <p>@Model.SurveyDescription</p>
+    <div class="row mb-4">
+        <div class="col-md-4 text-center">
+            <div class="stat-card bg-light p-3 rounded shadow-sm">
+                <h5>Total Submissions</h5>
+                <h3>@totalSubmissions</h3>
+            </div>
         </div>
-
-        <div class="text-center mb-4">
-            <h5>Total Submissions: @totalSubmissions</h5>
-            <h5>Average Answers per Submission: @avgAnswersPerSubmission.ToString("F2")</h5>
-            
+        <div class="col-md-4 text-center">
+            <div class="stat-card bg-light p-3 rounded shadow-sm">
+                <h5>Average Answers per Submission</h5>
+                <h3>@avgAnswersPerSubmission.ToString("F2")</h3>
+            </div>
         </div>
-
-        <div class="chart-buttons">
-            <button class="btn btn-primary" onclick="changeChartType('pie')">Pie Chart</button>
-            <button class="btn btn-primary" onclick="changeChartType('bar')">Bar Chart</button>
-            <button class="btn btn-primary" onclick="changeChartType('line')">Line Chart</button>
-        </div>
-
-        <div class="chart-container">
-            <script>
-                var questions = @Html.Raw(questionsJson);
-                var answers = @Html.Raw(submissionsJson);
-                var charts = [];
-                var chartType = 'pie';
-
-                document.addEventListener("DOMContentLoaded", function () {
-                    questions.forEach(function (question) {
-                        if (question.QuestionType !== "free_text_choice") {
-                            var ctx = document.getElementById('chart-' + question.QuestionId).getContext('2d');
-                            var labels = question.Choices;
-                            var data = labels.map(function (choice) {
-                                return answers.filter(function (answer) {
-                                    return answer.QuestionId === question.QuestionId && answer.AnswerValue === choice;
-                                }).length;
-                            });
-
-                            var chart = new Chart(ctx, {
-                                type: chartType,
-                                data: {
-                                    labels: labels,
-                                    datasets: [{
-                                        label: 'Responses',
-                                        data: data,
-                                        backgroundColor: [
-                                            'rgba(255, 99, 132, 0.2)',
-                                            'rgba(54, 162, 235, 0.2)',
-                                            'rgba(255, 206, 86, 0.2)',
-                                            'rgba(75, 192, 192, 0.2)',
-                                            'rgba(153, 102, 255, 0.2)',
-                                            'rgba(255, 159, 64, 0.2)'
-                                        ],
-                                        borderColor: [
-                                            'rgba(255, 99, 132, 1)',
-                                            'rgba(54, 162, 235, 1)',
-                                            'rgba(255, 206, 86, 1)',
-                                            'rgba(75, 192, 192, 1)',
-                                            'rgba(153, 102, 255, 1)',
-                                            'rgba(255, 159, 64, 1)'
-                                        ],
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: {
-                                        legend: {
-                                            position: 'top',
-                                        },
-                                        title: {
-                                            display: true,
-                                            text: 'Responses for ' + question.QuestionName
-                                        }
-                                    }
-                                }
-                            });
-
-                            charts.push(chart);
-                        } else {
-                            var answerList = document.createElement('ul');
-                            answers.filter(function (answer) {
-                                return answer.QuestionId === question.QuestionId;
-                            }).forEach(function (answer) {
-                                var listItem = document.createElement('li');
-                                listItem.textContent = answer.AnswerValue;
-                                answerList.appendChild(listItem);
-                            });
-
-                            var questionDiv = document.createElement('div');
-                            questionDiv.classList.add('mb-5');
-                            var questionTitle = document.createElement('h3');
-                            questionTitle.textContent = question.QuestionName;
-                            questionDiv.appendChild(questionTitle);
-                            questionDiv.appendChild(answerList);
-
-                            document.querySelector('.chart-container').appendChild(questionDiv);
-                        }
-                    });
-                });
-
-                function changeChartType(newType) {
-                    chartType = newType;
-                    charts.forEach(function (chart) {
-                        chart.config.type = newType;
-                        chart.update();
-                    });
-                }
-            </script>
-            @foreach (var question in Model.Questions)
-            {
-                if (question.QuestionType != QuestionType.free_text_choice.ToString())
-                {
-                    <div class="mb-5 text-center">
-                        <h3>@question.QuestionName</h3>
-                        <div class="chart-wrapper">
-                            <canvas id="chart-@question.QuestionId"></canvas>
-                        </div>
-                    </div>
-                }
-            }
+        <div class="col-md-4 text-center">
+            <div class="stat-card bg-light p-3 rounded shadow-sm">
+                <h5>Average Answers per Question</h5>
+                <h3>@avgAnswersPerQuestion.ToString("F2")</h3>
+            </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="chart-buttons mb-4 text-center">
+        <button class="btn btn-primary mx-1" onclick="changeChartType('pie')">Pie Chart</button>
+        <button class="btn btn-primary mx-1" onclick="changeChartType('bar')">Bar Chart</button>
+        <button class="btn btn-primary mx-1" onclick="changeChartType('line')">Line Chart</button>
+    </div>
 
-</body>
-</html>
+    <div class="chart-container">
+        <script>
+            var questions = @Html.Raw(questionsJson);
+            var answers = @Html.Raw(submissionsJson);
+            var charts = [];
+            var chartType = 'pie';
+
+            document.addEventListener("DOMContentLoaded", function () {
+                console.log('Questions:', questions);
+                console.log('Answers:', answers);
+                questions.forEach(function (question) {
+                    if (question.QuestionType !== "free_text_choice") {
+                        var ctx = document.getElementById('chart-' + question.QuestionId).getContext('2d');
+                        var labels = question.Choices;
+                        var data = labels.map(function (choice) {
+                            return answers.filter(function (answer) {
+                                return answer.QuestionId === question.QuestionId && answer.AnswerValue === choice;
+                            }).length;
+                        });
+
+                        var chart = new Chart(ctx, {
+                            type: chartType,
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Responses',
+                                    data: data,
+                                    backgroundColor: [
+                                        'rgba(255, 99, 132, 0.2)',
+                                        'rgba(54, 162, 235, 0.2)',
+                                        'rgba(255, 206, 86, 0.2)',
+                                        'rgba(75, 192, 192, 0.2)',
+                                        'rgba(153, 102, 255, 0.2)',
+                                        'rgba(255, 159, 64, 0.2)'
+                                    ],
+                                    borderColor: [
+                                        'rgba(255, 99, 132, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                        'rgba(75, 192, 192, 1)',
+                                        'rgba(153, 102, 255, 1)',
+                                        'rgba(255, 159, 64, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Responses for ' + question.QuestionName
+                                    }
+                                }
+                            }
+                        });
+
+                        charts.push(chart);
+                    } else {
+                        var answerList = document.createElement('ul');
+                        answers.filter(function (answer) {
+                            return answer.QuestionId === question.QuestionId;
+                        }).forEach(function (answer) {
+                            var listItem = document.createElement('li');
+                            listItem.textContent = answer.AnswerValue;
+                            answerList.appendChild(listItem);
+                        });
+
+                        var questionDiv = document.createElement('div');
+                        questionDiv.classList.add('mb-5');
+                        var questionTitle = document.createElement('h3');
+                        questionTitle.textContent = question.QuestionName;
+                        questionDiv.appendChild(questionTitle);
+                        questionDiv.appendChild(answerList);
+
+                        document.querySelector('.chart-container').appendChild(questionDiv);
+                    }
+                });
+            });
+
+            function changeChartType(newType) {
+                chartType = newType;
+                charts.forEach(function (chart) {
+                    chart.config.type = newType;
+                    chart.update();
+                });
+            }
+        </script>
+        @foreach (var question in Model.Questions)
+        {
+            if (question.QuestionType != QuestionType.free_text_choice.ToString())
+            {
+                <div class="mb-5 text-center">
+                    <h3>@question.QuestionName</h3>
+                    <div class="chart-wrapper" style="position: relative; height:300px; width:100%">
+                        <canvas id="chart-@question.QuestionId"></canvas>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

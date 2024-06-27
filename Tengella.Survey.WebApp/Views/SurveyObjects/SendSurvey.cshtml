@@ -4,10 +4,9 @@
     ViewData["Title"] = "Send Email";
 }
 
-<h1>Survey - Send Survey Email</h1>
-
 <div class="container mt-5">
     <div class="form-container">
+        <h1 class="display-4 text-primary">Survey - Send Survey Email</h1>
         <form asp-controller="SurveyObjects" asp-action="MailSurveyToList" method="post">
             <input type="hidden" name="SurveyObjectId" value="@Model.SurveyObjectId" />
 
@@ -86,11 +85,6 @@
     </div>
 </div>
 
-<text>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</text>
-
 <script>
     let userCount = @Model.Users.Count;
 
@@ -102,22 +96,20 @@
         userDiv.classList.add('form-group', 'border', 'p-3', 'mb-2');
 
         userDiv.innerHTML = `
-                    <button type="button" class="btn btn-sm btn-danger mb-2" onclick="removeUserRecipient(${userCount})">Remove User</button>
-                    <input type="text" name="Users[${userCount}].FirstName" class="form-control mb-2" placeholder="First Name" />
-                    <input type="text" name="Users[${userCount}].LastName" class="form-control mb-2" placeholder="Last Name" />
-                    <input type="email" name="Users[${userCount}].Email" class="form-control mb-2" placeholder="Email" />
-
-                    <select name="Users[${userCount}].UserType" class="form-control mb-2" onchange="toggleOrgFields(${userCount}, this.value)">
-                        <option value="private_person">Private Person</option>
-                        <option value="company_person">Company Person</option>
-                        <option value="government_person">Government Person</option>
-                    </select>
-
-                    <div id="org-fields-${userCount}" style="display:none;">
-                        <input type="text" name="Users[${userCount}].OrgNumber" class="form-control mb-2" placeholder="Org Number" />
-                        <input type="text" name="Users[${userCount}].OrgName" class="form-control mb-2" placeholder="Org Name" />
-                    </div>
-                `;
+                <button type="button" class="btn btn-sm btn-danger mb-2" onclick="removeUserRecipient(${userCount})">Remove User</button>
+                <input type="text" name="Users[${userCount}].FirstName" class="form-control mb-2" placeholder="First Name" />
+                <input type="text" name="Users[${userCount}].LastName" class="form-control mb-2" placeholder="Last Name" />
+                <input type="email" name="Users[${userCount}].Email" class="form-control mb-2" placeholder="Email" />
+                <select name="Users[${userCount}].UserType" class="form-control mb-2" onchange="toggleOrgFields(${userCount}, this.value)">
+                    <option value="private_person">Private Person</option>
+                    <option value="company_person">Company Person</option>
+                    <option value="government_person">Government Person</option>
+                </select>
+                <div id="org-fields-${userCount}" style="display:none;">
+                    <input type="text" name="Users[${userCount}].OrgNumber" class="form-control mb-2" placeholder="Org Number" />
+                    <input type="text" name="Users[${userCount}].OrgName" class="form-control mb-2" placeholder="Org Name" />
+                </div>
+            `;
 
         usersContainer.appendChild(userDiv);
         userCount++;

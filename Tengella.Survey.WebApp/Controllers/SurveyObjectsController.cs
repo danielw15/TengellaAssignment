@@ -42,7 +42,10 @@ namespace Tengella.Survey.WebApp.Controllers
         // GET: SurveyObjects
         public async Task<IActionResult> Index()
         {
-            return View(await _surveyService.GetAllSurveyAsync());
+            
+            var surveys = await _surveyService.GetAllSurveyAsync();
+            var surveyViewModels = _mapper.Map<IEnumerable<SurveyViewModel>>(surveys);
+            return View(surveyViewModels);
         }
 
         // GET: SurveyObjects/Details/5
@@ -494,7 +497,11 @@ namespace Tengella.Survey.WebApp.Controllers
 
             return View(model);
         }
+
+        
     }
+
+    
 
 }
 

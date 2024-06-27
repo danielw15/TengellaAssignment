@@ -21,7 +21,7 @@ namespace Tengella.Survey.Data.Models
         
         public string? PhoneNumber { get; set; }
         public DateTime CreationDate { get; set; }
-        public string UserType { get; set; }
+        public string? UserType { get; set; }
         public string? OrgNumber { get; set; }
         public string? OrgName { get; set; }
 
