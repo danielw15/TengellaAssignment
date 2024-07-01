@@ -24,15 +24,15 @@ public class SurveyDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         // Seed data
-        modelBuilder.Entity<User>().HasData(SeedUsers());
-        modelBuilder.Entity<SurveyTemplate>().HasData(SeedSurveyTemplates());
-        modelBuilder.Entity<TemplateQuestion>().HasData(SeedTemplateQuestions());
-        modelBuilder.Entity<TemplateChoice>().HasData(SeedTemplateChoices());
-        modelBuilder.Entity<SurveyObject>().HasData(SeedSurveyObjects());
-        modelBuilder.Entity<Question>().HasData(SeedQuestions());
-        modelBuilder.Entity<Choice>().HasData(SeedChoices());
-        modelBuilder.Entity<Submission>().HasData(SeedSubmissions());
-        modelBuilder.Entity<Answer>().HasData(SeedAnswers());
+        //modelBuilder.Entity<User>().HasData(SeedUsers());
+        //modelBuilder.Entity<SurveyTemplate>().HasData(SeedSurveyTemplates());
+        //modelBuilder.Entity<TemplateQuestion>().HasData(SeedTemplateQuestions());
+        //modelBuilder.Entity<TemplateChoice>().HasData(SeedTemplateChoices());
+        //modelBuilder.Entity<SurveyObject>().HasData(SeedSurveyObjects());
+        //modelBuilder.Entity<Question>().HasData(SeedQuestions());
+        //modelBuilder.Entity<Choice>().HasData(SeedChoices());
+        //modelBuilder.Entity<Submission>().HasData(SeedSubmissions());
+        //modelBuilder.Entity<Answer>().HasData(SeedAnswers());
     }
 
     public void TruncateAllTables()
