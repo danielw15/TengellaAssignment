@@ -41,8 +41,8 @@ namespace Tengella.Survey.Data.Repository
         {
             IQueryable<T> query = tracked ? dbSet : dbSet.AsNoTracking();
 
-            if (includeProperties)
-                query = IncludeProperties(query);
+            if (!includeProperties)
+                query = query.IgnoreAutoIncludes();
 
             return await query.FirstOrDefaultAsync(filter);
         }
@@ -59,7 +59,7 @@ namespace Tengella.Survey.Data.Repository
 
         public async Task SaveAsync()
         {
-            await db.SaveChangesAsync();
+            await _surveyDbContext.SaveChangesAsync();
         }
 
 
