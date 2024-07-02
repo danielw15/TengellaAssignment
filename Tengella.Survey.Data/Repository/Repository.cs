@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace Tengella.Survey.Data.Repository
         {
             await dbSet.AddAsync(entity);
         }
-
+        
         public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, bool includeProperties = false, bool tracked = false)
         {
             IQueryable<T> query = tracked ? dbSet : dbSet.AsNoTracking();
@@ -36,7 +37,7 @@ namespace Tengella.Survey.Data.Repository
 
             return await query.ToListAsync();
         }
-
+       
         public async Task<T?> GetAsync(Expression<Func<T, bool>> filter, bool includeProperties = true, bool tracked = false)
         {
             IQueryable<T> query = tracked ? dbSet : dbSet.AsNoTracking();
