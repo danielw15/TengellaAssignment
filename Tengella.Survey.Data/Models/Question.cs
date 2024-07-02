@@ -9,8 +9,6 @@ namespace Tengella.Survey.Data.Models
 {
     public class Question
     {
-        
-
         [Key]
         public int QuestionId { get; set; }
 
@@ -31,10 +29,8 @@ namespace Tengella.Survey.Data.Models
         public string QuestionType { get; set; } = string.Empty;
 
         // Navigation
-        public SurveyObject SurveyObject { get; set; } = new SurveyObject();
-
+        public SurveyObject SurveyObject { get; set; } = null!;
         public ICollection<Choice> Choices { get; set; } = new List<Choice>();
-
-
+        public ICollection<Answer> Answers { get; set; } = new List<Answer>();
     }
 }

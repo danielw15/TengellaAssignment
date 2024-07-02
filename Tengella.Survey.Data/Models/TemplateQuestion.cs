@@ -28,6 +28,7 @@ namespace Tengella.Survey.Data.Models
         public string QuestionType { get; set; } = string.Empty;
 
         // Navigation
+        public SurveyTemplate SurveyTemplate { get; set; } = null!;
         public ICollection<TemplateChoice> Choices { get; set; } = new HashSet<TemplateChoice>();
     }
 }

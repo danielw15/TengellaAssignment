@@ -10,15 +10,15 @@ public class SurveyDbContext : DbContext
     {
     }
 
-    public DbSet<User> Users { get; set; }
-    public DbSet<SurveyObject> SurveyObjects { get; set; }
-    public DbSet<Question> Questions { get; set; }
     public DbSet<Answer> Answers { get; set; }
     public DbSet<Choice> Choices { get; set; }
+    public DbSet<Question> Questions { get; set; }
     public DbSet<Submission> Submissions { get; set; }
+    public DbSet<SurveyObject> SurveyObjects { get; set; }
     public DbSet<SurveyTemplate> SurveyTemplates { get; set; }
-    public DbSet<TemplateQuestion> TemplateQuestions { get; set; }
     public DbSet<TemplateChoice> TemplateChoices { get; set; }
+    public DbSet<TemplateQuestion> TemplateQuestions { get; set; }
+    public DbSet<User> Users { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -33,6 +33,62 @@ public class SurveyDbContext : DbContext
         //modelBuilder.Entity<Choice>().HasData(SeedChoices());
         //modelBuilder.Entity<Submission>().HasData(SeedSubmissions());
         //modelBuilder.Entity<Answer>().HasData(SeedAnswers());
+        // Answer to Question relationship
+        modelBuilder.Entity<Answer>()
+            .HasOne(a => a.Question)
+            .WithMany(q => q.Answers)
+            .HasForeignKey(a => a.QuestionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Answer to Submission relationship
+        modelBuilder.Entity<Answer>()
+            .HasOne(a => a.Submission)
+            .WithMany(s => s.Answers)
+            .HasForeignKey(a => a.SubmissionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Choice to Question relationship
+        modelBuilder.Entity<Choice>()
+            .HasOne(c => c.Question)
+            .WithMany(q => q.Choices)
+            .HasForeignKey(c => c.QuestionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Question to SurveyObject relationship
+        modelBuilder.Entity<Question>()
+            .HasOne(q => q.SurveyObject)
+            .WithMany(s => s.Questions)
+            .HasForeignKey(q => q.SurveyObjectId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Submission to SurveyObject relationship
+        modelBuilder.Entity<Submission>()
+            .HasOne(s => s.SurveyObject)
+            .WithMany(s => s.Submissions)
+            .HasForeignKey(s => s.SurveyObjectId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // SurveyObject to User relationship
+        modelBuilder.Entity<SurveyObject>()
+            .HasOne(s => s.User)
+            .WithMany(u => u.SurveyObjects)
+            .HasForeignKey(s => s.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // TemplateChoice to TemplateQuestion relationship
+        modelBuilder.Entity<TemplateChoice>()
+            .HasOne(tc => tc.TemplateQuestion)
+            .WithMany(tq => tq.Choices)
+            .HasForeignKey(tc => tc.TemplateQuestionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // TemplateQuestion to SurveyTemplate relationship
+        modelBuilder.Entity<TemplateQuestion>()
+            .HasOne(tq => tq.SurveyTemplate)
+            .WithMany(st => st.Questions)
+            .HasForeignKey(tq => tq.SurveyTemplateId)
+            .OnDelete(DeleteBehavior.Restrict);
+
     }
 
     public void TruncateAllTables()

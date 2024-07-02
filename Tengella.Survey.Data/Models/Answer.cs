@@ -25,10 +25,7 @@ namespace Tengella.Survey.Data.Models
         public string AnswerValue { get; set; } = string.Empty;
 
         // Navigation Properties
-        [Required]
-        public Question Question { get; set; } = new Question();
-
-        [Required]
-        public Submission Submission { get; set; } = new Submission();
+        public Question Question { get; set; } = null!;
+        public Submission Submission { get; set; } = null!;
     }
 }

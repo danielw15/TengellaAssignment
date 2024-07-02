@@ -9,12 +9,15 @@ namespace Tengella.Survey.Data.Models
     public class Submission
     {
         public int SubmissionId { get; set; }
-        //FK
+
+        // Foreign Key
         public int SurveyObjectId { get; set; }
+
         public DateTime SubmissionDate { get; set; }
         public string? UniqueToken { get; set; }
-        //Navigation
+
+        // Navigation
+        public SurveyObject SurveyObject { get; set; } = null!;
         public ICollection<Answer> Answers { get; set; } = new List<Answer>();
-        public SurveyObject SurveyObject { get; set; } = new SurveyObject();
     }
 }

@@ -22,5 +22,8 @@ namespace Tengella.Survey.Data.Models
         [Required]
         [StringLength(200, ErrorMessage = "The choice text cannot exceed 200 characters.")]
         public string ChoiceText { get; set; } = string.Empty;
+
+        // Navigation
+        public Question Question { get; set; } = null!;
     }
 }

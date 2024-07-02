@@ -24,6 +24,6 @@ namespace Tengella.Survey.Data.Models
         public int ChoicePosition { get; set; }
 
         // Navigation
-        public TemplateQuestion TemplateQuestion { get; set; }
+        public TemplateQuestion TemplateQuestion { get; set; } = null!;
     }
 }

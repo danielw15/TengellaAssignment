@@ -9,7 +9,6 @@ namespace Tengella.Survey.Data.Models
 {
     public class SurveyObject
     {
-        
         [Key]
         public int SurveyObjectId { get; set; }
 
@@ -31,8 +30,7 @@ namespace Tengella.Survey.Data.Models
 
         // Navigation
         public User? User { get; set; }
-
         public ICollection<Question> Questions { get; set; } = new List<Question>();
-
+        public ICollection<Submission> Submissions { get; set; } = new List<Submission>();
     }
 }
