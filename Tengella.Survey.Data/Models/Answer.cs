@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,15 +9,26 @@ namespace Tengella.Survey.Data.Models
 {
     public class Answer
     {
+        [Key]
         public int AnswerId { get; set; }
-        //FK
-        public int? QuestionId { get; set; }
-        //FK
+
+        // Foreign Key
+        [Required]
+        public int QuestionId { get; set; }
+
+        // Foreign Key
+        [Required]
         public int SubmissionId { get; set; }
-        
-        public string? AnswerValue { get; set; }
-        //Navigation
-        public Question? Question { get; set; }
-        public Submission? Submission { get; set; }
+
+        [Required]
+        [StringLength(500)]
+        public string AnswerValue { get; set; } = string.Empty;
+
+        // Navigation Properties
+        [Required]
+        public Question Question { get; set; } = new Question();
+
+        [Required]
+        public Submission Submission { get; set; } = new Submission();
     }
 }

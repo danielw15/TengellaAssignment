@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Configuration;
 using Tengella.Survey.Data;
 using Tengella.Survey.Data.Mapper;
+using Tengella.Survey.Data.Repository;
 using Tengella.Survey.WebApp.Service;
 using Tengella.Survey.WebApp.ServiceInterface;
 using Tengella.Survey.WebApp.Settings;
@@ -18,6 +19,15 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ISurveyService, SurveyService>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
+
+builder.Services.AddTransient<IStatisticsService, StatisticsService>();
+
+builder.Services.AddScoped<ISurveyObjectRepository, SurveyObjectRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IChoiceRepository, ChoiceRepository>();
+builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddScoped<IMailSender, MailSender>();

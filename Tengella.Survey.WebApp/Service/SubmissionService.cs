@@ -1,64 +1,64 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Tengella.Survey.Data;
+using Tengella.Survey.Data.Exceptions;
 using Tengella.Survey.Data.Models;
+using Tengella.Survey.Data.Repository;
 using Tengella.Survey.WebApp.ServiceInterface;
 
 namespace Tengella.Survey.WebApp.Service
 {
     public class SubmissionService : ISubmissionService
     {
-        private readonly SurveyDbContext _context;
-        private readonly ISurveyService _surveyService;
 
-        public SubmissionService(SurveyDbContext context, ISurveyService surveyService) 
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public SubmissionService(IUnitOfWork unitOfWork, IMapper mapper) 
         {
-            _context = context;
-            _surveyService = surveyService;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
         public async Task<List<Submission>> GetAllSubmissionAsync()
         {
-            var submissionDbContext = _context.Submissions
-                .Include(s => s.Answers);
-            return await submissionDbContext.ToListAsync();
+            var submissions = await _unitOfWork.Submissions.GetAllAsync();
+            
+            return submissions.ToList();
         }
 
-        //public async Task<Submission> GetSubmissionAsync(int? id)
-        //{
-        //    var submissionObject = await _context.Submissions
-        //        .Include(s => s.Answers)
-        //        .FirstOrDefaultAsync(m => m.SubmissionId == id);
-
-        //    return submissionObject;
-        //}
         public async Task<Submission> GetSubmissionAsync(int? surveyId, string uniqueToken)
         {
-            var submissionObject = await _context.Submissions
-                .Include(s => s.Answers)
-                .FirstOrDefaultAsync(m => m.SurveyObjectId == surveyId && m.UniqueToken == uniqueToken);
+            var submission = await _unitOfWork.Submissions.GetAsync(m => m.SurveyObjectId == surveyId && m.UniqueToken == uniqueToken);
+            if(submission == null)
+            {
+                throw new SubmissionNotFoundException(surveyId.GetValueOrDefault(), uniqueToken);
+            }
 
-            return submissionObject;
+            return submission;
         }
 
         public async Task SaveSubmissionAsync()
         {
-            await _context.SaveChangesAsync();
+            await _unitOfWork.Submissions.SaveAsync();
         }
 
         public async Task SubmitSubmissionAsync(Submission submission)
         {
-            await _context.AddAsync(submission);
+            await _unitOfWork.Submissions.CreateAsync(submission);
+            await _unitOfWork.SaveAsync();
         }
 
-        public void UpdateSubmission(Submission submission)
+        public async void UpdateSubmission(Submission submission)
         {
-            _context.Update(submission);
+            await _unitOfWork.Submissions.UpdateAsync(submission);
+            await _unitOfWork.SaveAsync();
         }
-        public string CreateSubmission(int surveyId)
+        public async Task<string> CreateSubmission(int surveyId)
         {
-            var surveyObject = _context.SurveyObjects.Find(surveyId);
+            var surveyObject = await _unitOfWork.Surveys.GetAsync(s => s.SurveyObjectId == surveyId);
             if (surveyObject == null)
             {
-                throw new ArgumentException($"SurveyObject with ID {surveyId} does not exist.");
+                throw new SurveyNotFoundException(surveyId);
             }
             var uniqueToken = Guid.NewGuid().ToString();
 
@@ -68,9 +68,7 @@ namespace Tengella.Survey.WebApp.Service
                 UniqueToken = uniqueToken
             };
 
-            _context.Submissions.Add(submission);
-            _context.SaveChanges();
-
+            await _unitOfWork.Submissions.CreateAsync(submission);
             return uniqueToken;
         }
     }

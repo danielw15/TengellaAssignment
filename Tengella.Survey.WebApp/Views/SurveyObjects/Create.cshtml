@@ -1,9 +1,8 @@
 ﻿@model Tengella.Survey.WebApp.Models.SurveyViewModel
+
 @{
     ViewData["Title"] = "Create";
 }
-
-
 
 <div class="container mt-5">
     <div class="form-container">
@@ -33,7 +32,42 @@
             </div>
 
             <h4>Questions</h4>
-            <div id="questions-container" class="mb-3"></div>
+            <div id="questions-container" class="mb-3">
+                @if (Model.SurveyQuestions != null)
+                {
+                    for (int i = 0; i < Model.SurveyQuestions.Count; i++)
+                    {
+                        <div class="form-group mb-3 border p-3" id="question-@i">
+                            <h5>Question @(i + 1)</h5>
+                            <input type="hidden" name="SurveyQuestions[@i].QuestionId" value="@Model.SurveyQuestions[i].QuestionId" />
+                            <div class="mb-2">
+                                <label for="SurveyQuestions[@i].QuestionName" class="form-label">Question Name</label>
+                                <input type="text" name="SurveyQuestions[@i].QuestionName" class="form-control" value="@Model.SurveyQuestions[i].QuestionName" data-val="true" data-val-required="The Question Name field is required." data-val-length="The question name cannot exceed 200 characters." data-val-length-max="200" />
+                                <span class="text-danger field-validation-valid" data-valmsg-for="SurveyQuestions[@i].QuestionName" data-valmsg-replace="true"></span>
+                            </div>
+                            <div class="mb-2">
+                                <label for="SurveyQuestions[@i].QuestionPosition" class="form-label">Question Position</label>
+                                <input type="number" name="SurveyQuestions[@i].QuestionPosition" class="form-control" value="@Model.SurveyQuestions[i].QuestionPosition" data-val="true" data-val-required="The Question Position field is required." data-val-range="The question position must be a positive number." data-val-range-min="1" />
+                                <span class="text-danger field-validation-valid" data-valmsg-for="SurveyQuestions[@i].QuestionPosition" data-valmsg-replace="true"></span>
+                            </div>
+                            <div class="mb-2">
+                                <label for="SurveyQuestions[@i].QuestionType" class="form-label">Question Type</label>
+                                @{
+                                    var questionType = Model.SurveyQuestions[i].QuestionType;
+                                }
+                                <select name="SurveyQuestions[@i].QuestionType" class="form-select" data-val="true" data-val-required="The Question Type field is required." data-val-length="The question type cannot exceed 50 characters." data-val-length-max="50">
+                                    <option value="">Select Type</option>
+                                    <option value="single_choice">Single Choice</option>
+                                    <option value="multiple_choice">Multiple Choice</option>
+                                    <option value="free_text_choice">Free Text</option>
+                                </select>
+                                <span class="text-danger field-validation-valid" data-valmsg-for="SurveyQuestions[@i].QuestionType" data-valmsg-replace="true"></span>
+                            </div>
+                            <button type="button" class="btn btn-danger" onclick="removeQuestion(@i)">Remove Question</button>
+                        </div>
+                    }
+                }
+            </div>
 
             <div class="form-group mb-3">
                 <button type="button" id="addQuestionBtn" class="btn btn-custom">Add Question</button>
@@ -53,39 +87,52 @@
     }
 
     <script>
-        let questionIndex = 0;
+        let questionIndex = @Model.SurveyQuestions?.Count ?? 0;
 
         $(document).ready(function () {
             $('#addQuestionBtn').click(function () {
                 addQuestion();
             });
+
+            // Ensure client-side validation is applied to dynamically added elements
+            $('#formSurvey').on('submit', function () {
+                $.validator.unobtrusive.parse('#formSurvey');
+            });
         });
 
         function addQuestion() {
             const questionHtml = `
-                                            <div class="form-group mb-3 border p-3" id="question-${questionIndex}">
-                                                <h5>Question ${questionIndex + 1}</h5>
-                                                <input type="hidden" name="SurveyQuestions[${questionIndex}].QuestionId" value="0" />
-                                                <div class="mb-2">
-                                                                <label for="SurveyQuestions_${questionIndex}__QuestionName" class="form-label">Question Name</label>
-                                                                <input type="text" name="SurveyQuestions[${questionIndex}].QuestionName" class="form-control" />
-                                                </div>
-                                                <div class="mb-2">
-                                                                <label for="SurveyQuestions_${questionIndex}__QuestionPosition" class="form-label">Question Position</label>
-                                                                <input type="number" name="SurveyQuestions[${questionIndex}].QuestionPosition" class="form-control" />
-                                                </div>
-                                                <div class="mb-2">
-                                                                <label for="SurveyQuestions_${questionIndex}__QuestionType" class="form-label">Question Type</label>
-                                                                <select name="SurveyQuestions[${questionIndex}].QuestionType" class="form-select">
-                                                        <option value="single_choice">Single Choice</option>
-                                                        <option value="multiple_choice">Multiple Choice</option>
-                                                        <option value="free_text_choice">Free Text</option>
-                                                    </select>
-                                                </div>
-                                                <button type="button" class="btn btn-danger" onclick="removeQuestion(${questionIndex})">Remove Question</button>
-                                            </div>
-                                        `;
+                <div class="form-group mb-3 border p-3" id="question-${questionIndex}">
+                    <h5>Question ${questionIndex + 1}</h5>
+                    <input type="hidden" name="SurveyQuestions[${questionIndex}].QuestionId" value="0" />
+                    <div class="mb-2">
+                        <label for="SurveyQuestions[${questionIndex}].QuestionName" class="form-label">Question Name</label>
+                        <input type="text" name="SurveyQuestions[${questionIndex}].QuestionName" class="form-control" data-val="true" data-val-required="The Question Name field is required." data-val-length="The question name cannot exceed 200 characters." data-val-length-max="200" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="SurveyQuestions[${questionIndex}].QuestionName" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="mb-2">
+                        <label for="SurveyQuestions[${questionIndex}].QuestionPosition" class="form-label">Question Position</label>
+                        <input type="number" name="SurveyQuestions[${questionIndex}].QuestionPosition" class="form-control" data-val="true" data-val-required="The Question Position field is required." data-val-range="The question position must be a positive number." data-val-range-min="1" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="SurveyQuestions[${questionIndex}].QuestionPosition" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="mb-2">
+                        <label for="SurveyQuestions[${questionIndex}].QuestionType" class="form-label">Question Type</label>
+                        <select name="SurveyQuestions[${questionIndex}].QuestionType" class="form-select" data-val="true" data-val-required="The Question Type field is required." data-val-length="The question type cannot exceed 50 characters." data-val-length-max="50">
+                            <option value="">Select Type</option>
+                            <option value="single_choice">Single Choice</option>
+                            <option value="multiple_choice">Multiple Choice</option>
+                            <option value="free_text_choice">Free Text</option>
+                        </select>
+                        <span class="text-danger field-validation-valid" data-valmsg-for="SurveyQuestions[${questionIndex}].QuestionType" data-valmsg-replace="true"></span>
+                    </div>
+                    <button type="button" class="btn btn-danger" onclick="removeQuestion(${questionIndex})">Remove Question</button>
+                </div>
+            `;
             $('#questions-container').append(questionHtml);
+
+            // Re-parse the form for validation after adding a new question
+            $.validator.unobtrusive.parse('#formSurvey');
+
             questionIndex++;
         }
 

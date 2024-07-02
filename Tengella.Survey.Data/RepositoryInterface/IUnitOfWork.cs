@@ -8,11 +8,11 @@ namespace Tengella.Survey.Data.Repository
 {
     public interface IUnitOfWork
     {
-        IAnswerRepository AnswerRepository { get; }
-        IChoiceRepository ChoiceRepository { get; }
-        IQuestionRepository QuestionRepository { get; }
-        ISubmissionRepository SubmissionRepository { get; }
-        ISurveyObjectRepository SurveyObjectRepository { get; }
+        IAnswerRepository Answers { get; }
+        IChoiceRepository Choices { get; }
+        IQuestionRepository Questions { get; }
+        ISubmissionRepository Submissions { get; }
+        ISurveyObjectRepository Surveys { get; }
         Task SaveAsync();
     }
 }

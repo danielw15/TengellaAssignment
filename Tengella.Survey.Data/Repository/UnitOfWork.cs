@@ -9,14 +9,14 @@ namespace Tengella.Survey.Data.Repository
 {
     public class UnitOfWork(SurveyDbContext surveyDbContext, ISurveyObjectRepository surveys, IQuestionRepository questions, IChoiceRepository choices, ISubmissionRepository submissions, IAnswerRepository answers) : IUnitOfWork
     {
-        public ISurveyObjectRepository SurveyObjectRepository { get; } = surveys;
-        public IAnswerRepository AnswerRepository { get; } = answers;
+        public ISurveyObjectRepository Surveys { get; } = surveys;
+        public IAnswerRepository Answers { get; } = answers;
 
-        public IChoiceRepository ChoiceRepository { get; } = choices;
+        public IChoiceRepository Choices { get; } = choices;
 
-        public IQuestionRepository QuestionRepository { get; } = questions;
+        public IQuestionRepository Questions { get; } = questions;
 
-        public ISubmissionRepository SubmissionRepository { get; } = submissions;
+        public ISubmissionRepository Submissions { get; } = submissions;
 
         public async Task SaveAsync()
         {

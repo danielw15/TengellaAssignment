@@ -14,7 +14,7 @@ namespace Tengella.Survey.Data.Models
         public DateTime SubmissionDate { get; set; }
         public string? UniqueToken { get; set; }
         //Navigation
-        public ICollection<Answer>? Answers { get; set; }
-        public SurveyObject? SurveyObject { get; set; }
+        public ICollection<Answer> Answers { get; set; } = new List<Answer>();
+        public SurveyObject SurveyObject { get; set; } = new SurveyObject();
     }
 }

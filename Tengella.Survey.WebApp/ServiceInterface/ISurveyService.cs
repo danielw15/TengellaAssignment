@@ -6,11 +6,15 @@ namespace Tengella.Survey.WebApp.ServiceInterface
 {
     public interface ISurveyService
     {
-        Task<SurveyObject> GetSurveyAsync(int? id);
+        Task<SurveyObject> GetSurveyAsync(int id);
         Task<List<SurveyObject>> GetAllSurveyAsync();
         Task SubmitSurveyAsync(SurveyObject survey);
         Task SaveSurveyAsync();
         void UpdateSurvey(SurveyObject survey);
         string GenerateSurveyUrl(int surveyId);
+
+        SurveyObject MapSurveyViewModelToSurveyObject(SurveyViewModel model);
+        Task<DoSurveyViewModel> GetDoSurveyViewModelAsync(int surveyId, string uniqueToken);
+        Task<SendSurveyViewModel> GetSendSurveyViewModelAsync(int surveyId);
     }
 }

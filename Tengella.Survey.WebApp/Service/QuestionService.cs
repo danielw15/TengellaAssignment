@@ -2,45 +2,64 @@
 using Tengella.Survey.Data;
 using Tengella.Survey.WebApp.ServiceInterface;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using Tengella.Survey.Data.Repository;
+using Tengella.Survey.Data.Exceptions;
+using Tengella.Survey.WebApp.Models;
 
 namespace Tengella.Survey.WebApp.Service
 {
     public class QuestionService : IQuestionService
     {
-        private readonly SurveyDbContext _context;
-        public QuestionService(SurveyDbContext context)
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        public QuestionService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
         public async Task<List<Question>> GetAllQuestionAsync()
         {
-            var questionObject = _context.Questions
-                .Include(q => q.Choices);
-            return await questionObject.ToListAsync();
+            var question = await _unitOfWork.Questions.GetAllAsync();
+            return question.ToList();
         }
 
-        public async Task<Question> GetQuestionAsync(int? id)
+        public async Task<Question> GetQuestionAsync(int id)
         {
-            var questionObject = await _context.Questions
-                .Include(q => q.Choices)
-                .FirstOrDefaultAsync(m => m.QuestionId == id);
+            var question = await _unitOfWork.Questions.GetAsync(q => q.QuestionId == id);
+            if(question == null)
+            {
+                throw new QuestionNotFoundException(id);
+            }
 
-            return questionObject;
+            return question;
         }
 
         public async Task SaveQuestionAsync()
         {
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveAsync();
         }
 
         public async Task SubmitQuestionAsync(Question question)
         {
-            await _context.AddAsync(question);
+            await _unitOfWork.Questions.CreateAsync(question);
+            await _unitOfWork.SaveAsync();
         }
 
-        public void UpdateQuestion(Question question)
+        public async Task UpdateQuestionAsync(Question question)
         {
-            _context.Update(question);
+            await _unitOfWork.Questions.UpdateAsync(question);
+            await _unitOfWork.SaveAsync();
+        }
+        public async Task SaveChoicesAsync(AddChoiceViewModel model)
+        {
+            var questionList = _mapper.Map<List<Question>>(model.Questions).ToList();
+            for (int i = 0; i < questionList.Count; i++)
+            {
+                var question = await GetQuestionAsync(questionList[i].QuestionId);
+                question.Choices = _mapper.Map<List<Choice>>(model.Questions[i].QuestionChoices).ToList();
+                await UpdateQuestionAsync(question);
+            }
         }
 
 

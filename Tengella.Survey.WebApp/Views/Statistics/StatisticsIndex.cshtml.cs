@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Tengella.Survey.WebApp.Views.SurveyObjects
+namespace Tengella.Survey.WebApp.Views.Statistics
 {
     public class StatisticsIndexModel : PageModel
     {

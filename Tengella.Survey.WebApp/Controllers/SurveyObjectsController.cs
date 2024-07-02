@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Options;
 using Tengella.Survey.Data;
+using Tengella.Survey.Data.Exceptions;
 using Tengella.Survey.Data.Models;
 using Tengella.Survey.WebApp.Models;
 using Tengella.Survey.WebApp.Service;
@@ -49,7 +50,7 @@ namespace Tengella.Survey.WebApp.Controllers
         }
 
         // GET: SurveyObjects/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
             if (id == null)
             {
@@ -97,62 +98,15 @@ namespace Tengella.Survey.WebApp.Controllers
 
         // GET: SurveyObjects/DoSurvey/1
         [HttpGet("/SurveyObjects/DoSurvey/{surveyId}/{uniqueToken}")]
-        public async Task<IActionResult> DoSurvey(int? surveyId, string uniqueToken)
+        public async Task<IActionResult> DoSurvey(int surveyId, string uniqueToken)
         {
-            if (surveyId == null)
-            {
-                return NotFound();
-            }
-            var submission = await _submissionService.GetSubmissionAsync(surveyId, uniqueToken);
-
-            if (submission == null)
-            {
-                return NotFound();
-            }
-
-            var surveyObject = await _surveyService.GetSurveyAsync(surveyId);
-            
-            if (surveyObject == null)
-            {
-                return NotFound();
-            }
-            var viewModel = new DoSurveyViewModel
-            {
-                SubmissionId = submission.SubmissionId,
-                SurveyObjectId = surveyObject.SurveyObjectId,
-                UniqueToken = submission.UniqueToken,
-                SurveyTitle = surveyObject.SurveyTitle,
-                SurveyDescription = surveyObject.SurveyDescription,
-                SurveyQuestions = surveyObject.Questions.Select(q => new QuestionViewModel
-                {
-                    QuestionId = q.QuestionId,
-                    QuestionName = q.QuestionName,
-                    QuestionType = q.QuestionType,
-                    QuestionPosition = q.QuestionPosition,
-                    SurveyObjectId = q.SurveyObjectId,
-                    QuestionChoices = q.Choices.Select(c => new ChoiceViewModel
-                    {
-                        ChoiceId = c.ChoiceId,
-                        ChoicePosition = c.ChoicePosition,
-                        ChoiceText = c.ChoiceText,
-                        QuestionId = c.QuestionId,
-                    }).ToList(),
-                }).ToList(),
-                SurveyAnswers = _mapper.Map<List<AnswerViewModel>>(submission.Answers).ToList()
-            };
-            if(viewModel.SurveyQuestions.Count > viewModel.SurveyAnswers.Count)
-            {
-                for (int i = viewModel.SurveyAnswers.Count; i < viewModel.SurveyQuestions.Count; i++)
-                {
-                    viewModel.SurveyAnswers.Add(new AnswerViewModel());
-                }
-            }
+            var viewModel = await _surveyService.GetDoSurveyViewModelAsync(surveyId, uniqueToken);
             
             return View(viewModel);
         }
         
         [HttpPost("/SurveyObjects/DoSurvey/{surveyId}/{uniqueToken}")]
-        public async Task<IActionResult> DoSurvey(int? surveyId, string uniqueToken, DoSurveyViewModel viewModel)
+        public async Task<IActionResult> DoSurvey(int surveyId, string uniqueToken, DoSurveyViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -171,39 +125,26 @@ namespace Tengella.Survey.WebApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: SurveyObjects/Create
+       //GET : CREATE 
         public IActionResult Create()
         {
-            SurveyObject survey = new SurveyObject();
-            survey.UserId = 1;
             SurveyViewModel viewModel = new SurveyViewModel();
-            viewModel = _mapper.Map<SurveyViewModel>(survey);
-            var question = new QuestionViewModel();
-            
+            viewModel.UserId = 1;
             return View(viewModel);
         }
-
-        // POST: SurveyObjects/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //POST : CREATE
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(SurveyViewModel model)
         {
-            var survey = _mapper.Map<SurveyObject>(model);
-            for(int i = 0; i < model.SurveyQuestions.Count; i++)
+            if (!ModelState.IsValid)
             {
-                var question = _mapper.Map<Question>(model.SurveyQuestions[i]);
-                
-                survey.Questions.Add(question);
+                return View(model);
             }
-            
+            var survey = _surveyService.MapSurveyViewModelToSurveyObject(model);
             
             survey.UserId = 1;
             await _surveyService.SubmitSurveyAsync(survey);
-            await _surveyService.SaveSurveyAsync();
-
-            
             return RedirectToAction(nameof(Index));
         }
 
@@ -331,16 +272,7 @@ namespace Tengella.Survey.WebApp.Controllers
             {
                 try
                 {
-                    var questionList = _mapper.Map<List<Question>>(model.Questions).ToList();
-                    for (int i = 0; i < questionList.Count; i++)
-                    {
-                        questionList[i].Choices = _mapper.Map<List<Choice>>(model.Questions[i].QuestionChoices).ToList();
-                        _questionService.UpdateQuestion(questionList[i]);
-                        await _questionService.SaveQuestionAsync();
-                    }
-                    
-                    
-
+                    await _questionService.SaveChoicesAsync(model);
                     // Redirect to a confirmation page or survey details page
                     return RedirectToAction("Details", new { id = model.SurveyObjectId });
                 }
@@ -351,7 +283,6 @@ namespace Tengella.Survey.WebApp.Controllers
                     return View("Error");
                 }
             }
-
             // If model state is invalid, return the same view with the current model to show validation errors
             return View("AddChoices", model);
         }
@@ -370,54 +301,44 @@ namespace Tengella.Survey.WebApp.Controllers
         public async Task<IActionResult> SendSurvey(int surveyId)
         {
 
-            var survey = await _surveyService.GetSurveyAsync(surveyId);
-            var questionList = _mapper.Map<List<QuestionViewModel>>(survey.Questions.ToList());
-            int i = 0;
-            foreach (var question in survey.Questions)
+            try
             {
-                questionList[i].QuestionChoices = _mapper.Map<List<ChoiceViewModel>>(question.Choices).ToList();
-                i++;
+                var viewModel = await _surveyService.GetSendSurveyViewModelAsync(surveyId);
+                return View(viewModel);
             }
-            var addChoiceiewModel = new AddChoiceViewModel
+            catch(SurveyNotFoundException ex)
             {
-                SurveyObjectId = surveyId,
-                Questions = questionList
-            };
-            var userList = new List<UserViewModel>();
-            userList.Add(new UserViewModel());
-            var viewModel = new SendSurveyViewModel
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
             {
-                SurveyObjectId = surveyId,
-                SurveyTitle = survey.SurveyTitle,
-                SurveyDescription = survey.SurveyDescription,
-                AddChoice = addChoiceiewModel,
-                Subject = "",
-                Message = "",
-                Users = userList
-            };
-            
-            return View(viewModel);
+                // Handle other exceptions
+                // Log the exception and show an error view
+                
+                ViewBag.ErrorMessage = "An error occurred while preparing the survey. Please try again later.";
+                return View("Error");
+            }
+
+
         }
 
         [HttpPost]
         public async Task<IActionResult> MailSurveyToList(SendSurveyViewModel model)
         {
-            
+            //not implemented yet
             return RedirectToAction(nameof(Index));
         }
 
 
         [HttpGet("/SurveyObjects/GenerateSurveyUrl/{surveyId}")]
-        public IActionResult GenerateSurveyUrl(int surveyId)
+        public async Task<string> GenerateSurveyUrl(int surveyId)
         {
-            var surveyUrl = _submissionService.CreateSubmission(surveyId);
-
-            var viewModel = new SurveyViewModel
+            var surveyUrl = await _submissionService.CreateSubmission(surveyId);
+            if (surveyUrl == null)
             {
-                SurveyUrl = surveyUrl
-            };
-
-            return View("DoSurvey", viewModel);
+                return null;
+            }
+            return surveyUrl;
         }
 
         private bool SurveyObjectExists(int id)
