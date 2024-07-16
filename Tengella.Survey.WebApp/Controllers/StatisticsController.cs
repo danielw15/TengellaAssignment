@@ -15,7 +15,7 @@ namespace Tengella.Survey.WebApp.Controllers
         }
 
 
-        public async Task<IActionResult> StatisticsIndex()
+        public async Task<IActionResult> Index()
         {
             try
             {
@@ -30,7 +30,7 @@ namespace Tengella.Survey.WebApp.Controllers
                 return View("Error");
             }
         }
-        public async Task<IActionResult> Statistics(int id)
+        public async Task<IActionResult> Details(int id)
         {
             try
             {
