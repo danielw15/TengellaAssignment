@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Tengella.Survey.Data;
+using Tengella.Survey.Data.Exceptions;
 using Tengella.Survey.Data.Repository;
 using Tengella.Survey.WebApp.Models;
 using Tengella.Survey.WebApp.ServiceInterface;
@@ -58,6 +59,58 @@ namespace Tengella.Survey.WebApp.Service
             _logger.LogInformation("Grouped submissions count: {Count}", groupedSubmissions.Count);
 
             return groupedSubmissions;
+        }
+
+        public async Task<SurveyStatisticsViewModel> GetSurveyStatisticsViewModelAsync(int id)
+        {
+            var survey = await _surveyDbContext.SurveyObjects
+                .Include(s => s.Questions)
+                .ThenInclude(q => q.Choices)
+                .FirstOrDefaultAsync(s => s.SurveyObjectId == id);
+
+            if (survey == null)
+            { 
+                throw new SurveyNotFoundException(id);
+            }
+
+            var submissionList = _surveyDbContext.Submissions
+                .Include(s => s.Answers)
+                .Where(s => s.SurveyObjectId == id);
+            if (submissionList == null)
+            {
+                throw new SubmissionNotFoundException(id, "a");
+            }
+
+
+            var model = new SurveyStatisticsViewModel
+            {
+                SurveyTitle = survey.SurveyTitle,
+                SurveyDescription = survey.SurveyDescription,
+                Submissions = submissionList.Select(s => new SubmissionViewModel
+                {
+                    SubmissionId = s.SubmissionId,
+                    SurveyObjectId = s.SurveyObjectId,
+                    SubmissionDate = s.SubmissionDate,
+                    Answers = s.Answers.Select(a => new AnswerViewModel
+                    {
+                        AnswerId = a.AnswerId,
+                        AnswerValue = a.AnswerValue,
+                        QuestionId = a.QuestionId,
+                        SubmissionId = a.SubmissionId
+                    }).ToList()
+                }).ToList(),
+                Questions = survey.Questions.Select(q => new QuestionViewModel
+                {
+                    QuestionId = q.QuestionId,
+                    QuestionName = q.QuestionName,
+                    QuestionChoices = q.Choices.Select(c => new ChoiceViewModel
+                    {
+                        ChoiceText = c.ChoiceText,
+
+                    }).ToList()
+                }).ToList()
+            };
+            return model;
         }
     }
 }

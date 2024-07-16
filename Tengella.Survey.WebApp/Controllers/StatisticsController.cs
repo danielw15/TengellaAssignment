@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Tengella.Survey.WebApp.Models;
 using Tengella.Survey.WebApp.ServiceInterface;
 
 namespace Tengella.Survey.WebApp.Controllers
@@ -24,6 +26,21 @@ namespace Tengella.Survey.WebApp.Controllers
             {
                 // Log the exception and show an error view
                 
+                ViewBag.ErrorMessage = "An error occurred while retrieving the statistics. Please try again later.";
+                return View("Error");
+            }
+        }
+        public async Task<IActionResult> Statistics(int id)
+        {
+            try
+            {
+                var surveyStatistics = await _statisticsService.GetSurveyStatisticsViewModelAsync(id);
+                return View(surveyStatistics);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and show an error view
+
                 ViewBag.ErrorMessage = "An error occurred while retrieving the statistics. Please try again later.";
                 return View("Error");
             }

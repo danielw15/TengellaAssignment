@@ -11,6 +11,7 @@ namespace Tengella.Survey.Data.Exceptions
         public int SurveyId { get; }
         public string UniqueToken { get; }
 
+        
         public SubmissionNotFoundException(int surveyId, string uniqueToken)
             : base($"Submission not found for Survey ID: {surveyId} and Token: {uniqueToken}")
         {

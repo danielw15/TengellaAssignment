@@ -366,13 +366,13 @@ namespace Tengella.Survey.WebApp.Controllers
 
             return View(groupedSubmissions);
         }
-            public async Task<IActionResult> Statistics(int id)
+        public async Task<IActionResult> Statistics(int id)
         {
             var survey = await _context.SurveyObjects
                 .Include(s => s.Questions)
                 .ThenInclude(q => q.Choices)
                 .FirstOrDefaultAsync(s => s.SurveyObjectId == id);
-            
+
             if (survey == null)
             {
                 return NotFound();
@@ -391,7 +391,7 @@ namespace Tengella.Survey.WebApp.Controllers
             {
                 SurveyTitle = survey.SurveyTitle,
                 SurveyDescription = survey.SurveyDescription,
-                Submissions = submissionList.Select(s => new SubmissionViewModel 
+                Submissions = submissionList.Select(s => new SubmissionViewModel
                 {
                     SubmissionId = s.SubmissionId,
                     SurveyObjectId = s.SurveyObjectId,
@@ -411,7 +411,7 @@ namespace Tengella.Survey.WebApp.Controllers
                     QuestionChoices = q.Choices.Select(c => new ChoiceViewModel
                     {
                         ChoiceText = c.ChoiceText,
-                        
+
                     }).ToList()
                 }).ToList()
             };
@@ -419,7 +419,7 @@ namespace Tengella.Survey.WebApp.Controllers
             return View(model);
         }
 
-        
+
     }
 
     
