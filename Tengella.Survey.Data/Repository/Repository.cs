@@ -11,6 +11,7 @@ namespace Tengella.Survey.Data.Repository
 {
     public class Repository<T> : IRepository<T> where T : class
     {
+
         private readonly SurveyDbContext _surveyDbContext;
         internal DbSet<T> dbSet;
 
