@@ -94,8 +94,8 @@ namespace Tengella.Survey.WebApp.Service
             var viewModel = new DoSurveyViewModel
             {
                 SubmissionId = submission.SubmissionId,
-                SurveyObjectId = surveyObject.SurveyObjectId,
-                UniqueToken = submission.UniqueToken,
+                SurveyObjectId = surveyId,
+                UniqueToken = uniqueToken,
                 SurveyTitle = surveyObject.SurveyTitle,
                 SurveyDescription = surveyObject.SurveyDescription,
                 SurveyQuestions = surveyObject.Questions.Select(q => new QuestionViewModel
@@ -113,7 +113,8 @@ namespace Tengella.Survey.WebApp.Service
                         QuestionId = c.QuestionId,
                     }).ToList(),
                 }).ToList(),
-                SurveyAnswers = _mapper.Map<List<AnswerViewModel>>(submission.Answers).ToList()
+                SurveyAnswers = _mapper.Map<List<AnswerViewModel>>(submission.Answers)
+                                       .ToList()
             };
             if (viewModel.SurveyQuestions.Count > viewModel.SurveyAnswers.Count)
             {
@@ -152,6 +153,25 @@ namespace Tengella.Survey.WebApp.Service
                 Subject = "",
                 Message = "",
                 Users = userList
+            };
+
+            return viewModel;
+        }
+
+        public async Task<AddChoiceViewModel> GetAddChoiceViewModelAsync(int surveyId)
+        {
+            var survey = await _unitOfWork.Surveys.GetAsync(s => s.SurveyObjectId == surveyId);
+            var questionList = _mapper.Map<List<QuestionViewModel>>(survey.Questions.ToList());
+
+            for (int i = 0; i < survey.Questions.Count; i++)
+            {
+                questionList[i].QuestionChoices = _mapper.Map<List<ChoiceViewModel>>(survey.Questions.ElementAt(i).Choices.ToList());
+            }
+
+            var viewModel = new AddChoiceViewModel
+            {
+                SurveyObjectId = surveyId,
+                Questions = questionList
             };
 
             return viewModel;

@@ -52,7 +52,7 @@ namespace Tengella.Survey.WebApp.Controllers
         // GET: SurveyObjects/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
+            if (id == 0)
             {
                 return NotFound();
             }
@@ -84,11 +84,11 @@ namespace Tengella.Survey.WebApp.Controllers
         }
 
         [HttpGet("/SurveyObjects/CreateSubmission/{surveyId}")]
-        public IActionResult CreateSubmission(int surveyId)
+        public async Task<IActionResult> CreateSubmission(int surveyId)
         {
             
             
-                var uniqueToken = _submissionService.CreateSubmission(surveyId);
+                var uniqueToken = await _submissionService.CreateSubmission(surveyId);
 
                 // Redirect to the survey page with surveyId and uniqueToken
                 return RedirectToAction("DoSurvey", "SurveyObjects", new { surveyId = surveyId, uniqueToken = uniqueToken });
@@ -247,22 +247,21 @@ namespace Tengella.Survey.WebApp.Controllers
         [HttpGet("/SurveyObjects/AddChoice/{surveyId}")]
         public async Task<IActionResult> AddChoice(int surveyId)
         {
-            
-            var survey = await _surveyService.GetSurveyAsync(surveyId);
-            var questionList = _mapper.Map<List<QuestionViewModel>>(survey.Questions.ToList());
-            int i = 0;
-            foreach(var question in survey.Questions) 
-            {
-                questionList[i].QuestionChoices = _mapper.Map<List<ChoiceViewModel>>(question.Choices).ToList();
-                i++;
-            }
 
-            var viewModel = new AddChoiceViewModel
+            try
             {
-                SurveyObjectId = surveyId,
-                Questions = questionList
-            };
-            return View(viewModel);
+                var viewModel = await _surveyService.GetAddChoiceViewModelAsync(surveyId);
+                return View(viewModel);
+            }
+            catch (SurveyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "Failed to prepare AddChoiceViewModel: " + ex.Message;
+                return View("Error");
+            }
         }
 
         [HttpPost]

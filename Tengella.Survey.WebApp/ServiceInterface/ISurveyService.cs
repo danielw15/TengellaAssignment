@@ -16,5 +16,6 @@ namespace Tengella.Survey.WebApp.ServiceInterface
         SurveyObject MapSurveyViewModelToSurveyObject(SurveyViewModel model);
         Task<DoSurveyViewModel> GetDoSurveyViewModelAsync(int surveyId, string uniqueToken);
         Task<SendSurveyViewModel> GetSendSurveyViewModelAsync(int surveyId);
+        Task<AddChoiceViewModel> GetAddChoiceViewModelAsync(int surveyId);
     }
 }

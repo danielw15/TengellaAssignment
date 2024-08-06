@@ -9,6 +9,11 @@ namespace Tengella.Survey.Data.Models
 {
     public class SurveyObject
     {
+        public SurveyObject() 
+        {
+            Questions = new HashSet<Question>();
+            Submissions = new HashSet<Submission>();
+        }
         [Key]
         public int SurveyObjectId { get; set; }
 

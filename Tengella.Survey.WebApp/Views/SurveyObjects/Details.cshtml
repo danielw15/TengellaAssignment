@@ -44,7 +44,7 @@
     }
 
     <div class="form-container">
-        <a class="btn btn-warning mb-3" asp-action="Statistics" asp-route-id="@Model.SurveyObjectId">Show Stats</a>
+        <a class="btn btn-warning mb-3" asp-controller="Statistics" asp-action="Details" asp-route-id="@Model.SurveyObjectId">Show Stats</a>
         <a class="btn btn-primary mb-3" asp-action="SendSurvey" asp-route-id="@Model.SurveyObjectId">Email Survey</a>
         <a class="btn btn-secondary mb-3" asp-action="CreateSubmission" asp-route-id="@Model.SurveyObjectId">Take Survey</a>
         <a class="btn btn-success mb-3" asp-action="AddChoice" asp-route-id="@Model.SurveyObjectId">Add Choice</a>

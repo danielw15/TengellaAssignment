@@ -68,7 +68,7 @@ namespace Tengella.Survey.WebApp.Service
                 UniqueToken = uniqueToken
             };
 
-            await _unitOfWork.Submissions.CreateAsync(submission);
+            await SubmitSubmissionAsync(submission);
             return uniqueToken;
         }
     }

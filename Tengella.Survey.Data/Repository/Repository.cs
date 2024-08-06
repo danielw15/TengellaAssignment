@@ -43,8 +43,10 @@ namespace Tengella.Survey.Data.Repository
             IQueryable<T> query = tracked ? dbSet : dbSet.AsNoTracking();
 
             if (!includeProperties)
+            {
                 query = query.IgnoreAutoIncludes();
-
+            }
+            
             return await query.FirstOrDefaultAsync(filter);
         }
 
